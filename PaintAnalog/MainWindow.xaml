@@ -1,0 +1,24 @@
+﻿<Window x:Class="PaintAnalog.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:PaintAnalog.ViewModels"
+        Title="{Binding Title}" Height="600" Width="800"
+        WindowState="Maximized"
+        WindowStyle="SingleBorderWindow">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <DockPanel>
+        <ToolBar DockPanel.Dock="Top">
+            <Button Content="Clear" Command="{Binding ClearCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
+            <Button Content="Save" Command="{Binding SaveCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
+            <Button Content="Choose color" Command="{Binding ChooseColorCommand}" />
+        </ToolBar>
+        <Canvas Name="PaintCanvas" Background="White"
+                MouseDown="Canvas_MouseDown"
+                MouseMove="Canvas_MouseMove"
+                MouseUp="Canvas_MouseUp" />
+    </DockPanel>
+</Window>
