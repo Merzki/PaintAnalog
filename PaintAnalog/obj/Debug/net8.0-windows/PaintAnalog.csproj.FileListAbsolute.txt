@@ -38,3 +38,4 @@ C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\bin\Debug\net8.0-windows\sv\X
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\bin\Debug\net8.0-windows\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\PaintAnalog.csproj.AssemblyReference.cache
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\PaintAna.20A28FC5.Up2Date
+C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\PaintAnalog.sourcelink.json

@@ -4,6 +4,8 @@ using System.Windows.Media;
 using Microsoft.Win32;
 using System.Windows.Media.Imaging;
 using Xceed.Wpf.Toolkit;
+using System.Collections.Generic;
+using System.Windows;
 
 namespace PaintAnalog.ViewModels
 {
@@ -11,6 +13,8 @@ namespace PaintAnalog.ViewModels
     {
         private string _title = "Paint Analog";
         private SolidColorBrush _selectedColor = new SolidColorBrush(Colors.Black);
+        private readonly Stack<UIElement[]> _undoElements = new();
+        private readonly Stack<UIElement[]> _redoElements = new();
 
         public string Title
         {
@@ -27,34 +31,32 @@ namespace PaintAnalog.ViewModels
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
         public ICommand SaveCanvasCommand { get; }
+        public ICommand UndoCommand { get; }
+        public ICommand RedoCommand { get; }
 
         public MainViewModel()
         {
             ClearCanvasCommand = new RelayCommand(ClearCanvas);
             ChooseColorCommand = new RelayCommand(ChooseColor);
             SaveCanvasCommand = new RelayCommand(SaveCanvas);
-        }
-
-        private void ClearCanvas(object parameter)
-        {
-            var canvas = parameter as Canvas;
-            canvas?.Children.Clear();
+            UndoCommand = new RelayCommand(Undo, CanUndo);
+            RedoCommand = new RelayCommand(Redo, CanRedo);
         }
 
         private void ChooseColor(object parameter)
         {
             var colorDialog = new Xceed.Wpf.Toolkit.ColorPicker
             {
-                SelectedColor = SelectedColor.Color 
+                SelectedColor = SelectedColor.Color
             };
 
             var colorPickerPopup = new System.Windows.Controls.Primitives.Popup
             {
                 Placement = System.Windows.Controls.Primitives.PlacementMode.Center,
-                PlacementTarget = parameter as System.Windows.UIElement, 
+                PlacementTarget = parameter as System.Windows.UIElement,
                 StaysOpen = false,
-                Child = colorDialog, 
-                IsOpen = true 
+                Child = colorDialog,
+                IsOpen = true
             };
 
             colorDialog.SelectedColorChanged += (s, e) =>
@@ -72,6 +74,15 @@ namespace PaintAnalog.ViewModels
         }
 
 
+        private void ClearCanvas(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas != null)
+            {
+                SaveState(canvas);
+                canvas.Children.Clear();
+            }
+        }
 
         private void SaveCanvas(object parameter)
         {
@@ -102,5 +113,66 @@ namespace PaintAnalog.ViewModels
                 }
             }
         }
+
+        public void SaveState(Canvas canvas)
+        {
+            if (canvas == null) return;
+
+            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
+
+            if (_undoElements.Count == 0 || !currentElements.SequenceEqual(_undoElements.Peek()))
+            {
+                _undoElements.Push(currentElements);
+                _redoElements.Clear();
+
+                ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
+                ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private void Undo(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null || _undoElements.Count == 0) return;
+
+            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
+            _redoElements.Push(currentElements);
+
+            var previousElements = _undoElements.Pop(); 
+            RestoreCanvas(canvas, previousElements);
+
+            ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+        }
+
+        private void Redo(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null || _redoElements.Count == 0) return;
+
+            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
+            _undoElements.Push(currentElements); 
+
+            var nextElements = _redoElements.Pop(); 
+            RestoreCanvas(canvas, nextElements);
+
+            ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+        }
+
+
+        private void RestoreCanvas(Canvas canvas, UIElement[] elements)
+        {
+            canvas.Children.Clear(); 
+            foreach (var element in elements)
+            {
+                canvas.Children.Add(element);
+            }
+        }
+
+        private bool CanUndo(object parameter) => _undoElements.Count > 0;
+
+        private bool CanRedo(object parameter) => _redoElements.Count > 0;
     }
 }

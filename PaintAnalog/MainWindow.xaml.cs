@@ -15,23 +15,6 @@ namespace PaintAnalog
             InitializeComponent();
         }
 
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (ViewModel?.SelectedColor != null)
-                {
-                    _currentLine = new Polyline
-                    {
-                        Stroke = ViewModel.SelectedColor,
-                        StrokeThickness = 2
-                    };
-                    _currentLine.Points.Add(e.GetPosition(PaintCanvas));
-                    PaintCanvas.Children.Add(_currentLine);
-                }
-            }
-        }
-
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (_currentLine != null && e.LeftButton == MouseButtonState.Pressed)
@@ -40,8 +23,33 @@ namespace PaintAnalog
             }
         }
 
+
+        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (ViewModel?.SelectedColor != null)
+                {
+                    ViewModel?.SaveState(PaintCanvas);
+
+                    _currentLine = new Polyline
+                    {
+                        Stroke = ViewModel.SelectedColor,
+                        StrokeThickness = 2
+                    };
+
+                    _currentLine.Points.Add(e.GetPosition(PaintCanvas));
+                    PaintCanvas.Children.Add(_currentLine);
+                }
+            }
+        }
+
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (PaintCanvas != null)
+            {
+                ViewModel?.SaveState(PaintCanvas);
+            }
             _currentLine = null;
         }
     }
