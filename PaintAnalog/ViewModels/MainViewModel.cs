@@ -73,6 +73,68 @@ namespace PaintAnalog.ViewModels
             };
         }
 
+        public void SaveState(Canvas canvas)
+        {
+            if (canvas == null) return;
+
+            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
+
+            if (_undoElements.Count == 0 || !currentElements.SequenceEqual(_undoElements.Peek()))
+            {
+                _undoElements.Push(currentElements);
+                _redoElements.Clear();
+
+                ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
+                ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+            }
+        }
+
+        private void Undo(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null || _undoElements.Count <= 1) return;
+
+            var currentElements = _undoElements.Pop(); 
+            _redoElements.Push(currentElements); 
+
+            var previousElements = _undoElements.Peek(); 
+            RestoreCanvas(canvas, previousElements);
+
+            ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+        }
+
+        private void Redo(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null || _redoElements.Count == 0) return;
+
+            var nextElements = _redoElements.Pop(); 
+            _undoElements.Push(nextElements); 
+            RestoreCanvas(canvas, nextElements);
+
+            ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+        }
+
+        private void RestoreCanvas(Canvas canvas, UIElement[] elements)
+        {
+            canvas.Children.Clear();
+            foreach (var element in elements)
+            {
+                canvas.Children.Add(element);
+            }
+        }
+
+        private bool CanUndo(object parameter)
+        {
+            return _undoElements.Count > 1;
+        }
+
+        private bool CanRedo(object parameter)
+        {
+            return _redoElements.Count > 0;
+        }
 
         private void ClearCanvas(object parameter)
         {
@@ -113,66 +175,5 @@ namespace PaintAnalog.ViewModels
                 }
             }
         }
-
-        public void SaveState(Canvas canvas)
-        {
-            if (canvas == null) return;
-
-            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
-
-            if (_undoElements.Count == 0 || !currentElements.SequenceEqual(_undoElements.Peek()))
-            {
-                _undoElements.Push(currentElements);
-                _redoElements.Clear();
-
-                ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
-                ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
-            }
-        }
-
-
-        private void Undo(object parameter)
-        {
-            var canvas = parameter as Canvas;
-            if (canvas == null || _undoElements.Count == 0) return;
-
-            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
-            _redoElements.Push(currentElements);
-
-            var previousElements = _undoElements.Pop(); 
-            RestoreCanvas(canvas, previousElements);
-
-            ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
-        }
-
-        private void Redo(object parameter)
-        {
-            var canvas = parameter as Canvas;
-            if (canvas == null || _redoElements.Count == 0) return;
-
-            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
-            _undoElements.Push(currentElements); 
-
-            var nextElements = _redoElements.Pop(); 
-            RestoreCanvas(canvas, nextElements);
-
-            ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
-        }
-
-
-        private void RestoreCanvas(Canvas canvas, UIElement[] elements)
-        {
-            canvas.Children.Clear(); 
-            foreach (var element in elements)
-            {
-                canvas.Children.Add(element);
-            }
-        }
-
-        private bool CanUndo(object parameter) => _undoElements.Count > 0;
-
-        private bool CanRedo(object parameter) => _redoElements.Count > 0;
     }
 }
