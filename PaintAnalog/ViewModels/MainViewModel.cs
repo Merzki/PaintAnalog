@@ -47,10 +47,11 @@ namespace PaintAnalog.ViewModels
         {
             var colorDialog = new Xceed.Wpf.Toolkit.ColorPicker
             {
-                SelectedColor = SelectedColor.Color
+                SelectedColor = SelectedColor.Color,
+                UsingAlphaChannel = true 
             };
 
-            var colorPickerPopup = new System.Windows.Controls.Primitives.Popup
+            var popup = new System.Windows.Controls.Primitives.Popup
             {
                 Placement = System.Windows.Controls.Primitives.PlacementMode.Center,
                 PlacementTarget = parameter as System.Windows.UIElement,
@@ -59,17 +60,13 @@ namespace PaintAnalog.ViewModels
                 IsOpen = true
             };
 
-            colorDialog.SelectedColorChanged += (s, e) =>
+            colorDialog.MouseLeftButtonUp += (s, e) =>
             {
                 if (colorDialog.SelectedColor.HasValue)
                 {
                     SelectedColor = new SolidColorBrush(colorDialog.SelectedColor.Value);
                 }
-                else
-                {
-                    SelectedColor = new SolidColorBrush(Colors.Black);
-                }
-                colorPickerPopup.IsOpen = false;
+                popup.IsOpen = false;
             };
         }
 
