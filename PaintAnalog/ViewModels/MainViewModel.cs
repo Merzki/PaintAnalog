@@ -33,6 +33,7 @@ namespace PaintAnalog.ViewModels
         public ICommand SaveCanvasCommand { get; }
         public ICommand UndoCommand { get; }
         public ICommand RedoCommand { get; }
+        public ICommand InsertImageCommand { get; }
 
         public MainViewModel()
         {
@@ -41,6 +42,7 @@ namespace PaintAnalog.ViewModels
             SaveCanvasCommand = new RelayCommand(SaveCanvas);
             UndoCommand = new RelayCommand(Undo, CanUndo);
             RedoCommand = new RelayCommand(Redo, CanRedo);
+            InsertImageCommand = new RelayCommand(InsertImage);
         }
 
         private void ChooseColor(object parameter)
@@ -68,6 +70,37 @@ namespace PaintAnalog.ViewModels
                 }
                 popup.IsOpen = false;
             };
+        }
+
+        private void InsertImage(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null) return;
+
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif",
+                Title = "Insert Image"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                var bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
+
+                var image = new Image
+                {
+                    Source = bitmap,
+                    Width = bitmap.Width,
+                    Height = bitmap.Height
+                };
+
+                Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
+                Canvas.SetTop(image, (canvas.ActualHeight - bitmap.Height) / 2);
+
+                canvas.Children.Add(image);
+
+                SaveState(canvas);
+            }
         }
 
         public void SaveState(Canvas canvas)
