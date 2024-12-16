@@ -6,6 +6,7 @@ using System.Windows.Media.Imaging;
 using Xceed.Wpf.Toolkit;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Shapes;
 
 namespace PaintAnalog.ViewModels
 {
@@ -50,7 +51,7 @@ namespace PaintAnalog.ViewModels
             var colorDialog = new Xceed.Wpf.Toolkit.ColorPicker
             {
                 SelectedColor = SelectedColor.Color,
-                UsingAlphaChannel = true 
+                UsingAlphaChannel = true
             };
 
             var popup = new System.Windows.Controls.Primitives.Popup
@@ -72,7 +73,7 @@ namespace PaintAnalog.ViewModels
             };
         }
 
-        private void InsertImage(object parameter)
+        public void InsertImage(object parameter)
         {
             var canvas = parameter as Canvas;
             if (canvas == null) return;
@@ -97,11 +98,101 @@ namespace PaintAnalog.ViewModels
                 Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
                 Canvas.SetTop(image, (canvas.ActualHeight - bitmap.Height) / 2);
 
-                canvas.Children.Add(image);
+                AddResizeHandles(canvas, image);
 
+                image.MouseDown += (s, e) => ((MainWindow)Application.Current.MainWindow)?.Image_MouseDown(s, e);
+                image.MouseMove += (s, e) => ((MainWindow)Application.Current.MainWindow)?.Image_MouseMove(s, e);
+                image.MouseUp += (s, e) => ((MainWindow)Application.Current.MainWindow)?.Image_MouseUp(s, e);
+
+                canvas.Children.Add(image);
                 SaveState(canvas);
             }
         }
+
+        private bool _isResizing;
+        public bool IsResizing
+        {
+            get => _isResizing;
+            set => SetProperty(ref _isResizing, value);
+        }
+
+        private void AddResizeHandles(Canvas canvas, Image image)
+        {
+            var topLeftHandle = CreateResizeHandle();
+            var bottomRightHandle = CreateResizeHandle();
+
+            UpdateHandlePositions(image, topLeftHandle, bottomRightHandle);
+
+            canvas.Children.Add(topLeftHandle);
+            canvas.Children.Add(bottomRightHandle);
+
+            topLeftHandle.MouseMove += (s, e) =>
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    _isResizing = true;
+                    var position = e.GetPosition(canvas);
+
+                    var newWidth = image.Width - (position.X - Canvas.GetLeft(image));
+                    var newHeight = image.Height - (position.Y - Canvas.GetTop(image));
+
+                    if (newWidth > 0 && newHeight > 0)
+                    {
+                        image.Width = newWidth;
+                        image.Height = newHeight;
+
+                        Canvas.SetLeft(image, position.X);
+                        Canvas.SetTop(image, position.Y);
+
+                        UpdateHandlePositions(image, topLeftHandle, bottomRightHandle);
+                    }
+                }
+            };
+
+            bottomRightHandle.MouseMove += (s, e) =>
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    _isResizing = true;
+                    var position = e.GetPosition(canvas);
+
+                    var newWidth = position.X - Canvas.GetLeft(image);
+                    var newHeight = position.Y - Canvas.GetTop(image);
+
+                    if (newWidth > 0 && newHeight > 0)
+                    {
+                        image.Width = newWidth;
+                        image.Height = newHeight;
+
+                        UpdateHandlePositions(image, topLeftHandle, bottomRightHandle);
+                    }
+                }
+            };
+
+            topLeftHandle.MouseUp += (s, e) => _isResizing = false;
+            bottomRightHandle.MouseUp += (s, e) => _isResizing = false;
+        }
+
+        private void UpdateHandlePositions(Image image, Rectangle topLeftHandle, Rectangle bottomRightHandle)
+        {
+            Canvas.SetLeft(topLeftHandle, Canvas.GetLeft(image) - topLeftHandle.Width / 2);
+            Canvas.SetTop(topLeftHandle, Canvas.GetTop(image) - topLeftHandle.Height / 2);
+
+            Canvas.SetLeft(bottomRightHandle, Canvas.GetLeft(image) + image.Width - bottomRightHandle.Width / 2);
+            Canvas.SetTop(bottomRightHandle, Canvas.GetTop(image) + image.Height - bottomRightHandle.Height / 2);
+        }
+
+        private Rectangle CreateResizeHandle()
+        {
+            return new Rectangle
+            {
+                Width = 10,
+                Height = 10,
+                Fill = Brushes.Red,
+                Cursor = Cursors.SizeNWSE
+            };
+        }
+
 
         public void SaveState(Canvas canvas)
         {
@@ -124,10 +215,10 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null || _undoElements.Count <= 1) return;
 
-            var currentElements = _undoElements.Pop(); 
-            _redoElements.Push(currentElements); 
+            var currentElements = _undoElements.Pop();
+            _redoElements.Push(currentElements);
 
-            var previousElements = _undoElements.Peek(); 
+            var previousElements = _undoElements.Peek();
             RestoreCanvas(canvas, previousElements);
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
@@ -139,8 +230,8 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null || _redoElements.Count == 0) return;
 
-            var nextElements = _redoElements.Pop(); 
-            _undoElements.Push(nextElements); 
+            var nextElements = _redoElements.Pop();
+            _undoElements.Push(nextElements);
             RestoreCanvas(canvas, nextElements);
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();

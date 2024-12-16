@@ -19,9 +19,11 @@
             <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
         </ToolBar>
-        <Canvas Name="PaintCanvas" Background="White"
-                MouseDown="Canvas_MouseDown"
-                MouseMove="Canvas_MouseMove"
-                MouseUp="Canvas_MouseUp" />
+        <Canvas x:Name="PaintCanvas"
+        Background="White"
+        MouseDown="Canvas_MouseDown"
+        MouseMove="Canvas_MouseMove"
+        MouseUp="Canvas_MouseUp">
+        </Canvas>
     </DockPanel>
 </Window>
