@@ -188,11 +188,11 @@ namespace PaintAnalog.ViewModels
             {
                 Width = 10,
                 Height = 10,
-                Fill = Brushes.Red,
+                Fill = Brushes.Transparent,
+                StrokeThickness = 0,        
                 Cursor = Cursors.SizeNWSE
             };
         }
-
 
         public void SaveState(Canvas canvas)
         {
