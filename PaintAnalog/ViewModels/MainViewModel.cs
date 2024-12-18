@@ -7,6 +7,7 @@ using Xceed.Wpf.Toolkit;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Shapes;
+using System.Windows.Documents;
 
 namespace PaintAnalog.ViewModels
 {
@@ -44,6 +45,12 @@ namespace PaintAnalog.ViewModels
             UndoCommand = new RelayCommand(Undo, CanUndo);
             RedoCommand = new RelayCommand(Redo, CanRedo);
             InsertImageCommand = new RelayCommand(InsertImage);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                var canvas = mainWindow?.FindName("PaintCanvas") as Canvas;
+                SaveState(canvas);
+            });
         }
 
         private void ChooseColor(object parameter)
@@ -98,13 +105,15 @@ namespace PaintAnalog.ViewModels
                 Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
                 Canvas.SetTop(image, (canvas.ActualHeight - bitmap.Height) / 2);
 
-                AddResizeHandles(canvas, image);
-
-                image.MouseDown += (s, e) => ((MainWindow)Application.Current.MainWindow)?.Image_MouseDown(s, e);
-                image.MouseMove += (s, e) => ((MainWindow)Application.Current.MainWindow)?.Image_MouseMove(s, e);
-                image.MouseUp += (s, e) => ((MainWindow)Application.Current.MainWindow)?.Image_MouseUp(s, e);
-
                 canvas.Children.Add(image);
+
+                var adornerLayer = AdornerLayer.GetAdornerLayer(image);
+                if (adornerLayer != null)
+                {
+                    var resizeAdorner = new ResizeAdorner(image);
+                    adornerLayer.Add(resizeAdorner);
+                }
+
                 SaveState(canvas);
             }
         }
@@ -209,6 +218,7 @@ namespace PaintAnalog.ViewModels
                 ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
             }
         }
+
 
         private void Undo(object parameter)
         {

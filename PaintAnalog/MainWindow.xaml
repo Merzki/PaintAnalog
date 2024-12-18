@@ -5,11 +5,9 @@
         Title="{Binding Title}" Height="600" Width="800"
         WindowState="Maximized"
         WindowStyle="SingleBorderWindow">
-
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
-
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <Button Content="Clear" Command="{Binding ClearCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
@@ -19,8 +17,7 @@
             <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
         </ToolBar>
-        <Canvas x:Name="PaintCanvas"
-        Background="White"
+        <Canvas x:Name="PaintCanvas" Background="White"
         MouseDown="Canvas_MouseDown"
         MouseMove="Canvas_MouseMove"
         MouseUp="Canvas_MouseUp">
