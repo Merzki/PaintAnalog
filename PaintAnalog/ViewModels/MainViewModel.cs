@@ -36,6 +36,7 @@ namespace PaintAnalog.ViewModels
         public ICommand UndoCommand { get; }
         public ICommand RedoCommand { get; }
         public ICommand InsertImageCommand { get; }
+        public ICommand ConfirmChangesCommand { get; }
 
         public MainViewModel()
         {
@@ -51,6 +52,7 @@ namespace PaintAnalog.ViewModels
                 var canvas = mainWindow?.FindName("PaintCanvas") as Canvas;
                 SaveState(canvas);
             });
+            ConfirmChangesCommand = new RelayCommand(ConfirmChanges, CanConfirmChanges);
         }
 
         private void ChooseColor(object parameter)
@@ -115,7 +117,60 @@ namespace PaintAnalog.ViewModels
                 }
 
                 SaveState(canvas);
+
+                ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
             }
+        }
+
+        private bool CanConfirmChanges(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null) return false;
+
+            foreach (var element in canvas.Children)
+            {
+                if (element is Image image)
+                {
+                    var adornerLayer = AdornerLayer.GetAdornerLayer(image);
+                    if (adornerLayer != null)
+                    {
+                        var adorners = adornerLayer.GetAdorners(image);
+                        if (adorners != null && adorners.Length > 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void ConfirmChanges(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null) return;
+
+            foreach (var element in canvas.Children)
+            {
+                if (element is Image image)
+                {
+                    var adornerLayer = AdornerLayer.GetAdornerLayer(image);
+                    if (adornerLayer != null)
+                    {
+                        var adorners = adornerLayer.GetAdorners(image);
+                        if (adorners != null)
+                        {
+                            foreach (var adorner in adorners)
+                            {
+                                adornerLayer.Remove(adorner);
+                            }
+                        }
+                    }
+                    image.IsEnabled = false;
+                }
+            }
+
+            ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
         private bool _isResizing;
@@ -233,6 +288,7 @@ namespace PaintAnalog.ViewModels
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
         private void Redo(object parameter)
@@ -246,6 +302,7 @@ namespace PaintAnalog.ViewModels
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
         private void RestoreCanvas(Canvas canvas, UIElement[] elements)
@@ -275,6 +332,8 @@ namespace PaintAnalog.ViewModels
                 SaveState(canvas);
                 canvas.Children.Clear();
             }
+
+            ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
         private void SaveCanvas(object parameter)
@@ -295,7 +354,7 @@ namespace PaintAnalog.ViewModels
                     (int)canvas.ActualHeight,
                     96, 96, PixelFormats.Pbgra32);
 
-                renderBitmap.Render(canvas);
+                renderBitmap.Render(canvas);    
 
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(renderBitmap));

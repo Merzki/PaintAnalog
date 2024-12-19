@@ -14,6 +14,7 @@
             <Button Content="Save" Command="{Binding SaveCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Choose color" Command="{Binding ChooseColorCommand}" />
             <Button Content="Insert Image" Command="{Binding InsertImageCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
+            <Button Content="Confirm Changes" Command="{Binding ConfirmChangesCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
         </ToolBar>
