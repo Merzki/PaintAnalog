@@ -13,6 +13,10 @@ namespace PaintAnalog
         private Point _startPoint;
         private Polyline _currentPolyline;
 
+        private Image _selectedImage;
+        private Point _imageStartPoint;
+        private Point _canvasStartOffset;
+
         private MainViewModel ViewModel => DataContext as MainViewModel;
 
         public MainWindow()
@@ -22,38 +26,64 @@ namespace PaintAnalog
 
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            var canvas = sender as Canvas;
+            var position = e.GetPosition(PaintCanvas);
+
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                var canvas = sender as Canvas;
+                var clickedElement = e.OriginalSource as UIElement;
 
-                ViewModel?.SaveState(canvas);
-
-                _isDrawing = true;
-                _startPoint = e.GetPosition(PaintCanvas);
-
-                _currentPolyline = new Polyline
+                if (clickedElement is Image image)
                 {
-                    Stroke = ViewModel?.SelectedColor ?? Brushes.Black,
-                    StrokeThickness = 2,
-                    Points = new PointCollection { _startPoint }
-                };
+                    _selectedImage = image;
+                    _imageStartPoint = position;
+                    _canvasStartOffset = new Point(Canvas.GetLeft(image), Canvas.GetTop(image));
+                }
+                else
+                {
+                    ViewModel?.SaveState(canvas);
 
-                PaintCanvas.Children.Add(_currentPolyline);
+                    _isDrawing = true;
+                    _startPoint = position;
+
+                    _currentPolyline = new Polyline
+                    {
+                        Stroke = ViewModel?.SelectedColor ?? Brushes.Black,
+                        StrokeThickness = 2,
+                        Points = new PointCollection { _startPoint }
+                    };
+
+                    PaintCanvas.Children.Add(_currentPolyline);
+                }
             }
         }
 
-
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
+            var position = e.GetPosition(PaintCanvas);
+
+            if (_selectedImage != null && e.LeftButton == MouseButtonState.Pressed)
             {
-                var position = e.GetPosition(PaintCanvas);
+                var offsetX = position.X - _imageStartPoint.X;
+                var offsetY = position.Y - _imageStartPoint.Y;
+
+                Canvas.SetLeft(_selectedImage, _canvasStartOffset.X + offsetX);
+                Canvas.SetTop(_selectedImage, _canvasStartOffset.Y + offsetY);
+            }
+            else if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
+            {
                 _currentPolyline?.Points.Add(position);
             }
         }
 
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_selectedImage != null)
+            {
+                ViewModel?.SaveState(PaintCanvas);
+                _selectedImage = null;
+            }
+
             if (_isDrawing && e.LeftButton == MouseButtonState.Released)
             {
                 _isDrawing = false;
