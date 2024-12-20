@@ -17,6 +17,7 @@
             <Button Content="Confirm Changes" Command="{Binding ConfirmChangesCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
+            <Button Content="Brush Settings" Click="OpenPenSettings" />
         </ToolBar>
         <Canvas x:Name="PaintCanvas" Background="White"
         MouseDown="Canvas_MouseDown"

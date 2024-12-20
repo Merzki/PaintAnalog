@@ -39,3 +39,5 @@ C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\bin\Debug\net8.0-windows\zh-H
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\PaintAnalog.csproj.AssemblyReference.cache
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\PaintAna.20A28FC5.Up2Date
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\PaintAnalog.sourcelink.json
+C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\PenSettingsWindow.baml
+C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\PenSettingsWindow.g.cs
