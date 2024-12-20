@@ -4,9 +4,13 @@
         Title="Pen Settings" Height="300" Width="400">
     <StackPanel Margin="10">
         <TextBlock Text="Pen Thickness" FontWeight="Bold" Margin="0,0,0,5" />
-        <Slider x:Name="ThicknessSlider" Minimum="1" Maximum="20" Value="{Binding PenThickness}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,10" />
+        <Slider x:Name="ThicknessSlider" Minimum="1" Maximum="20"
+                Value="{Binding SelectedThickness}" 
+                TickFrequency="1" 
+                IsSnapToTickEnabled="True" 
+                Margin="0,0,0,10" />
         <TextBlock Text="Pen Shape" FontWeight="Bold" Margin="0,10,0,5" />
-        <ComboBox x:Name="ShapeComboBox" SelectedValue="{Binding SelectedShape}" SelectedValuePath="Tag">
+        <ComboBox x:Name="ShapeComboBox" SelectedValue="{Binding SelectedShape}" SelectedValuePath="Tag" Margin="0,0,0,10">
             <ComboBoxItem Content="Polyline" Tag="Polyline" />
             <ComboBoxItem Content="Rectangle" Tag="Rectangle" />
             <ComboBoxItem Content="Triangle" Tag="Triangle" />

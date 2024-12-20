@@ -6,20 +6,30 @@ namespace PaintAnalog.Views
 {
     public partial class PenSettingsWindow : Window
     {
-        public string SelectedShape { get; set; } = "Polyline";
-        public Brush SelectedBrush { get; private set; } = Brushes.Black;
-        public double SelectedThickness { get; private set; } = 2.0;
+        public string SelectedShape { get; set; }
+        public Brush SelectedBrush { get; private set; }
+        public double SelectedThickness { get; set; }
 
-        public PenSettingsWindow(Brush currentBrush, double currentThickness)
+        public PenSettingsWindow(Brush currentBrush, double currentThickness, string currentShape)
         {
             InitializeComponent();
 
             SelectedBrush = currentBrush;
             SelectedThickness = currentThickness;
+            SelectedShape = currentShape;
 
             ThicknessSlider.Value = currentThickness;
 
-            DataContext = this;
+            foreach (ComboBoxItem item in ShapeComboBox.Items)
+            {
+                if ((string)item.Tag == currentShape)
+                {
+                    ShapeComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+            DataContext = this; 
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)

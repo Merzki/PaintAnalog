@@ -96,7 +96,7 @@ namespace PaintAnalog
 
         private void OpenPenSettings(object sender, RoutedEventArgs e)
         {
-            var penSettingsWindow = new PenSettingsWindow(Brushes.Black, _currentThickness);
+            var penSettingsWindow = new PenSettingsWindow(ViewModel?.SelectedColor ?? Brushes.Black, _currentThickness, _currentShape);
             if (penSettingsWindow.ShowDialog() == true)
             {
                 _currentThickness = penSettingsWindow.SelectedThickness;
