@@ -41,3 +41,5 @@ C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Pain
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\PaintAnalog.sourcelink.json
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\PenSettingsWindow.baml
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\PenSettingsWindow.g.cs
+C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\ResizeCanvasDialog.baml
+C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\ResizeCanvasDialog.g.cs

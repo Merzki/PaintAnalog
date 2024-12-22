@@ -21,11 +21,39 @@ namespace PaintAnalog
         private double _currentThickness = 2.0;
         private string _currentShape = "Polyline";
 
+        private double _zoomScale = 1.0;
+        private const double ZoomFactor = 0.1;
+
         private MainViewModel ViewModel => DataContext as MainViewModel;
 
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                _zoomScale += (e.Delta > 0) ? ZoomFactor : -ZoomFactor;
+
+                _zoomScale = Math.Clamp(_zoomScale, 0.1, 5.0);
+
+                CanvasScaleTransform.ScaleX = _zoomScale;
+                CanvasScaleTransform.ScaleY = _zoomScale;
+
+                e.Handled = true;
+            }
+        }
+
+        private void ResizeCanvas(object sender, RoutedEventArgs e)
+        {
+            var dialog = new ResizeCanvasDialog(PaintCanvas.Width, PaintCanvas.Height);
+            if (dialog.ShowDialog() == true)
+            {
+                PaintCanvas.Width = dialog.NewWidth;
+                PaintCanvas.Height = dialog.NewHeight;
+            }
         }
 
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -201,6 +229,5 @@ namespace PaintAnalog
                 polygon.Points.Add(vertex);      
             }
         }
-
     }
 }
