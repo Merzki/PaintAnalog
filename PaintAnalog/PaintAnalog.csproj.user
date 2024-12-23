@@ -13,6 +13,9 @@
     <Compile Update="Views\ResizeCanvasDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\ToolsWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="MainWindow.xaml">
@@ -22,6 +25,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\ResizeCanvasDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ToolsWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

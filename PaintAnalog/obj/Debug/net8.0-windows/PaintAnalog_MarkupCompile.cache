@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\App.xaml
-3-311727854
+42118214399
 
-101333102032
+111127142652
 2031107992608
-MainWindow.xaml;Views\PenSettingsWindow.xaml;Views\ResizeCanvasDialog.xaml;
+MainWindow.xaml;Views\PenSettingsWindow.xaml;Views\ResizeCanvasDialog.xaml;Views\ToolsWindow.xaml;
 
 False
 

@@ -1,0 +1,9 @@
+﻿<Window x:Class="PaintAnalog.Views.ToolsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tools" Height="200" Width="300">
+    <StackPanel>
+        <Button Content="Brush" Click="BrushSelected" Margin="10" />
+        <Button Content="Eraser" Click="EraserSelected" Margin="10" />
+    </StackPanel>
+</Window>

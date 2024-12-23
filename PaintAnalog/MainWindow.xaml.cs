@@ -56,24 +56,97 @@ namespace PaintAnalog
             }
         }
 
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            var canvas = sender as Canvas;
             var position = e.GetPosition(PaintCanvas);
 
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (position.X - _currentThickness / 2 < 0 || position.X + _currentThickness / 2 > PaintCanvas.ActualWidth ||
+                position.Y - _currentThickness / 2 < 0 || position.Y + _currentThickness / 2 > PaintCanvas.ActualHeight)
             {
-                var clickedElement = e.OriginalSource as UIElement;
-
-                if (clickedElement != null && (clickedElement is Image || clickedElement is Shape))
+                if (_eraserCursor != null)
                 {
-                    _selectedElement = clickedElement;
-                    _elementStartPoint = position;
-                    _canvasStartOffset = new Point(Canvas.GetLeft(clickedElement), Canvas.GetTop(clickedElement));
+                    _eraserCursor.Visibility = Visibility.Collapsed;
+                }
+                return;
+            }
+
+            if (_eraserCursor == null)
+            {
+                _eraserCursor = new Rectangle
+                {
+                    Width = _currentThickness,
+                    Height = _currentThickness,
+                    Fill = Brushes.Transparent,
+                    Visibility = Visibility.Visible
+                };
+
+                PaintCanvas.Children.Add(_eraserCursor);
+            }
+
+            Canvas.SetLeft(_eraserCursor, position.X - _currentThickness / 2);
+            Canvas.SetTop(_eraserCursor, position.Y - _currentThickness / 2);
+
+            foreach (UIElement child in PaintCanvas.Children)
+            {
+                Panel.SetZIndex(child, 0);
+            }
+            Panel.SetZIndex(_eraserCursor, 1);
+
+            if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (_currentShape == "Eraser")
+                {
+                    var eraserElement = new Rectangle
+                    {
+                        Fill = Brushes.White,
+                        Width = _currentThickness,
+                        Height = _currentThickness
+                    };
+
+                    Canvas.SetLeft(eraserElement, position.X - _currentThickness / 2);
+                    Canvas.SetTop(eraserElement, position.Y - _currentThickness / 2);
+
+                    PaintCanvas.Children.Add(eraserElement);
                 }
                 else
                 {
-                    ViewModel?.SaveState(canvas);
+                    UpdateShape(_currentShapeElement, _startPoint, position);
+                }
+            }
+        }
+
+        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var position = e.GetPosition(PaintCanvas);
+
+            if (position.X - _currentThickness / 2 < 0 || position.X + _currentThickness / 2 > PaintCanvas.ActualWidth ||
+                position.Y - _currentThickness / 2 < 0 || position.Y + _currentThickness / 2 > PaintCanvas.ActualHeight)
+            {
+                return;
+            }
+
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (_currentShape == "Eraser")
+                {
+                    _isDrawing = true;
+                    _startPoint = position;
+
+                    _currentShapeElement = new Rectangle
+                    {
+                        Fill = Brushes.White,
+                        Width = _currentThickness,
+                        Height = _currentThickness
+                    };
+
+                    Canvas.SetLeft(_currentShapeElement, position.X - _currentThickness / 2);
+                    Canvas.SetTop(_currentShapeElement, position.Y - _currentThickness / 2);
+
+                    PaintCanvas.Children.Add(_currentShapeElement);
+                }
+                else
+                {
+                    ViewModel?.SaveState(PaintCanvas);
 
                     _isDrawing = true;
                     _startPoint = position;
@@ -87,38 +160,38 @@ namespace PaintAnalog
             }
         }
 
-        private void Canvas_MouseMove(object sender, MouseEventArgs e)
-        {
-            var position = e.GetPosition(PaintCanvas);
-
-            if (_selectedElement != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                var offsetX = position.X - _elementStartPoint.X;
-                var offsetY = position.Y - _elementStartPoint.Y;
-
-                Canvas.SetLeft(_selectedElement, _canvasStartOffset.X + offsetX);
-                Canvas.SetTop(_selectedElement, _canvasStartOffset.Y + offsetY);
-            }
-            else if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
-            {
-                UpdateShape(_currentShapeElement, _startPoint, position);
-            }
-        }
-
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_selectedElement != null)
-            {
-                ViewModel?.SaveState(PaintCanvas);
-                _selectedElement = null;
-            }
-
             if (_isDrawing && e.LeftButton == MouseButtonState.Released)
             {
                 _isDrawing = false;
                 _currentShapeElement = null;
 
                 ViewModel?.SaveState(PaintCanvas);
+            }
+        }
+
+        private Rectangle _eraserCursor;
+
+        private void OpenToolsWindow(object sender, RoutedEventArgs e)
+        {
+            var toolsWindow = new ToolsWindow();
+            if (toolsWindow.ShowDialog() == true)
+            {
+                if (toolsWindow.SelectedTool == "Brush")
+                {
+                    _currentShape = "Polyline";
+                }
+                else if (toolsWindow.SelectedTool == "Eraser")
+                {
+                    _currentShape = "Eraser";
+                }
+
+                if (_eraserCursor != null)
+                {
+                    PaintCanvas.Children.Remove(_eraserCursor);
+                    _eraserCursor = null;
+                }
             }
         }
 

@@ -10,6 +10,7 @@
     </Window.DataContext>
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
+            <Button Content="Tools" Click="OpenToolsWindow" />
             <Button Content="Clear" Command="{Binding ClearCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Save" Command="{Binding SaveCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Choose color" Command="{Binding ChooseColorCommand}" />
