@@ -274,7 +274,6 @@ namespace PaintAnalog.ViewModels
             }
         }
 
-
         private void Undo(object parameter)
         {
             var canvas = parameter as Canvas;
@@ -349,12 +348,43 @@ namespace PaintAnalog.ViewModels
 
             if (saveFileDialog.ShowDialog() == true)
             {
+                Rect bounds = new Rect();
+                foreach (UIElement element in canvas.Children)
+                {
+                    if (element.Visibility == Visibility.Visible)
+                    {
+                        Rect elementBounds = VisualTreeHelper.GetDescendantBounds(element);
+                        if (elementBounds.IsEmpty) continue;
+
+                        Point elementPosition = new Point(Canvas.GetLeft(element), Canvas.GetTop(element));
+                        if (double.IsNaN(elementPosition.X)) elementPosition.X = 0; 
+                        if (double.IsNaN(elementPosition.Y)) elementPosition.Y = 0;
+
+                        GeneralTransform transform = element.TransformToAncestor(canvas);
+                        elementPosition = transform.Transform(elementPosition);
+
+                        bounds.Union(new Rect(elementPosition, elementBounds.Size));
+                    }
+                }
+
+                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+                {
+                    System.Windows.MessageBox.Show("Canva is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 var renderBitmap = new RenderTargetBitmap(
-                    (int)canvas.ActualWidth,
-                    (int)canvas.ActualHeight,
+                    (int)Math.Ceiling(bounds.Width),
+                    (int)Math.Ceiling(bounds.Height),
                     96, 96, PixelFormats.Pbgra32);
 
-                renderBitmap.Render(canvas);    
+                var visual = new DrawingVisual();
+                using (var context = visual.RenderOpen())
+                {
+                    context.PushTransform(new TranslateTransform(-bounds.X, -bounds.Y));
+                    context.DrawRectangle(new VisualBrush(canvas), null, new Rect(new Point(), bounds.Size));
+                }
+                renderBitmap.Render(visual);
 
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
