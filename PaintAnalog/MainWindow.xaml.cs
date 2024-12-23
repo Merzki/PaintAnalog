@@ -29,6 +29,7 @@ namespace PaintAnalog
         public MainWindow()
         {
             InitializeComponent();
+            UpdateToolSettingsButton();
         }
 
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -94,7 +95,7 @@ namespace PaintAnalog
 
             if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
             {
-                if (_currentShape == "Eraser")
+                if (_currentTool == "Eraser")
                 {
                     var eraserElement = new Rectangle
                     {
@@ -127,22 +128,22 @@ namespace PaintAnalog
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if (_currentShape == "Eraser")
+                if (_currentTool == "Eraser")
                 {
                     _isDrawing = true;
                     _startPoint = position;
 
-                    _currentShapeElement = new Rectangle
+                    var eraserElement = new Rectangle
                     {
                         Fill = Brushes.White,
                         Width = _currentThickness,
                         Height = _currentThickness
                     };
 
-                    Canvas.SetLeft(_currentShapeElement, position.X - _currentThickness / 2);
-                    Canvas.SetTop(_currentShapeElement, position.Y - _currentThickness / 2);
+                    Canvas.SetLeft(eraserElement, position.X - _currentThickness / 2);
+                    Canvas.SetTop(eraserElement, position.Y - _currentThickness / 2);
 
-                    PaintCanvas.Children.Add(_currentShapeElement);
+                    PaintCanvas.Children.Add(eraserElement);
                 }
                 else
                 {
@@ -167,7 +168,10 @@ namespace PaintAnalog
                 _isDrawing = false;
                 _currentShapeElement = null;
 
-                ViewModel?.SaveState(PaintCanvas);
+                if (_currentTool != "Eraser")
+                {
+                    ViewModel?.SaveState(PaintCanvas);
+                }
             }
         }
 
@@ -178,20 +182,27 @@ namespace PaintAnalog
             var toolsWindow = new ToolsWindow();
             if (toolsWindow.ShowDialog() == true)
             {
-                if (toolsWindow.SelectedTool == "Brush")
-                {
-                    _currentShape = "Polyline";
-                }
-                else if (toolsWindow.SelectedTool == "Eraser")
-                {
-                    _currentShape = "Eraser";
-                }
+                _currentTool = toolsWindow.SelectedTool; 
+                UpdateToolSettingsButton(); 
+            }
+        }
 
-                if (_eraserCursor != null)
-                {
-                    PaintCanvas.Children.Remove(_eraserCursor);
-                    _eraserCursor = null;
-                }
+        private string _currentTool = "Brush";
+
+        private void UpdateToolSettingsButton()
+        {
+            SettingsButton.Click -= OpenPenSettings;
+            SettingsButton.Click -= OpenEraserSettings;
+
+            if (_currentTool == "Brush")
+            {
+                SettingsButton.Content = "Brush Settings";
+                SettingsButton.Click += OpenPenSettings; 
+            }
+            else if (_currentTool == "Eraser")
+            {
+                SettingsButton.Content = "Eraser Settings";
+                SettingsButton.Click += OpenEraserSettings; 
             }
         }
 
@@ -202,6 +213,15 @@ namespace PaintAnalog
             {
                 _currentThickness = penSettingsWindow.SelectedThickness;
                 _currentShape = penSettingsWindow.SelectedShape;
+            }
+        }
+
+        private void OpenEraserSettings(object sender, RoutedEventArgs e)
+        {
+            var eraserSettingsWindow = new EraserSettingsWindow(_currentThickness);
+            if (eraserSettingsWindow.ShowDialog() == true)
+            {
+                _currentThickness = eraserSettingsWindow.SelectedThickness;
             }
         }
 

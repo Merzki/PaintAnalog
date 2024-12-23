@@ -52,7 +52,7 @@ namespace PaintAnalog.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/PaintAnalog;component/views/toolswindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/PaintAnalog;V1.0.0.0;component/views/toolswindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\ToolsWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

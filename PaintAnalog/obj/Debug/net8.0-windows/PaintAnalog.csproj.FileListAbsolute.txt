@@ -45,3 +45,5 @@ C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\View
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\ResizeCanvasDialog.g.cs
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\ToolsWindow.baml
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\ToolsWindow.g.cs
+C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\EraserSettingsWindow.baml
+C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\obj\Debug\net8.0-windows\Views\EraserSettingsWindow.g.cs

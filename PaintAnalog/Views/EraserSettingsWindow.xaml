@@ -1,0 +1,13 @@
+﻿<Window x:Class="PaintAnalog.Views.EraserSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Eraser Settings" Height="200" Width="300">
+    <Grid>
+        <TextBlock Text="Thickness" VerticalAlignment="Top" Margin="10" />
+        <Slider x:Name="ThicknessSlider" Minimum="1" Maximum="50" Margin="10,30,10,70" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom">
+            <Button Content="OK" Click="Confirm_Click" Margin="5,0" />
+            <Button Content="Cancel" Click="Cancel_Click" Margin="5,0" />
+        </StackPanel>
+    </Grid>
+</Window>

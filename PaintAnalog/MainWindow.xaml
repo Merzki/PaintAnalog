@@ -18,7 +18,7 @@
             <Button Content="Confirm Changes" Command="{Binding ConfirmChangesCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button Content="Brush Settings" Click="OpenPenSettings" />
+            <Button x:Name="SettingsButton" Content="Brush Settings" Click="OpenPenSettings" />
             <Button Content="Resize Canvas" Click="ResizeCanvas" />
         </ToolBar>
         <ScrollViewer x:Name="CanvasScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="Gray">
