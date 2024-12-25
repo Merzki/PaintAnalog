@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using PaintAnalog.ViewModels;
 using PaintAnalog.Views;
@@ -30,18 +31,23 @@ namespace PaintAnalog
         {
             InitializeComponent();
             UpdateToolSettingsButton();
+
+            Canvas.SetLeft(PaintCanvas, 0);
+            Canvas.SetTop(PaintCanvas, 0);
         }
 
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
-                _zoomScale += (e.Delta > 0) ? ZoomFactor : -ZoomFactor;
-
-                _zoomScale = Math.Clamp(_zoomScale, 0.1, 5.0);
+                double scale = (e.Delta > 0) ? ZoomFactor : -ZoomFactor;
+                _zoomScale = Math.Clamp(_zoomScale + scale, 0.1, 5.0);
 
                 CanvasScaleTransform.ScaleX = _zoomScale;
                 CanvasScaleTransform.ScaleY = _zoomScale;
+
+                Canvas.SetLeft(PaintCanvas, 0);
+                Canvas.SetTop(PaintCanvas, 0);
 
                 e.Handled = true;
             }
@@ -52,8 +58,17 @@ namespace PaintAnalog
             var dialog = new ResizeCanvasDialog(PaintCanvas.Width, PaintCanvas.Height);
             if (dialog.ShowDialog() == true)
             {
-                PaintCanvas.Width = dialog.NewWidth;
-                PaintCanvas.Height = dialog.NewHeight;
+                double newWidth = dialog.NewWidth;
+                double newHeight = dialog.NewHeight;
+
+                PaintCanvas.Width = newWidth;
+                PaintCanvas.Height = newHeight;
+
+                Canvas.SetLeft(PaintCanvas, 0);
+                Canvas.SetTop(PaintCanvas, 0);
+
+                CanvasScrollViewer.ScrollToHorizontalOffset(0);
+                CanvasScrollViewer.ScrollToVerticalOffset(0);
             }
         }
 
@@ -120,8 +135,7 @@ namespace PaintAnalog
         {
             var position = e.GetPosition(PaintCanvas);
 
-            if (position.X - _currentThickness / 2 < 0 || position.X + _currentThickness / 2 > PaintCanvas.ActualWidth ||
-                position.Y - _currentThickness / 2 < 0 || position.Y + _currentThickness / 2 > PaintCanvas.ActualHeight)
+            if (position.X < 0 || position.X > PaintCanvas.ActualWidth || position.Y < 0 || position.Y > PaintCanvas.ActualHeight)
             {
                 return;
             }
@@ -144,6 +158,10 @@ namespace PaintAnalog
                     Canvas.SetTop(eraserElement, position.Y - _currentThickness / 2);
 
                     PaintCanvas.Children.Add(eraserElement);
+                }
+                else if (_currentTool == "Fill")
+                {
+                    PerformFill(position);
                 }
                 else
                 {
@@ -197,12 +215,23 @@ namespace PaintAnalog
             if (_currentTool == "Brush")
             {
                 SettingsButton.Content = "Brush Settings";
-                SettingsButton.Click += OpenPenSettings; 
+                SettingsButton.IsEnabled = true;
+                SettingsButton.Click += OpenPenSettings;
             }
             else if (_currentTool == "Eraser")
             {
                 SettingsButton.Content = "Eraser Settings";
-                SettingsButton.Click += OpenEraserSettings; 
+                SettingsButton.IsEnabled = true;
+                SettingsButton.Click += OpenEraserSettings;
+            }
+            else if (_currentTool == "Fill")
+            {
+                SettingsButton.Content = "No Settings";
+                SettingsButton.IsEnabled = false;
+            }
+            else
+            {
+                SettingsButton.IsEnabled = true;
             }
         }
 
@@ -222,6 +251,95 @@ namespace PaintAnalog
             if (eraserSettingsWindow.ShowDialog() == true)
             {
                 _currentThickness = eraserSettingsWindow.SelectedThickness;
+            }
+        }
+
+        private void PerformFill(Point position)
+        {
+            var fillColor = (ViewModel?.SelectedColor as SolidColorBrush)?.Color ?? Colors.Black;
+
+            int canvasWidth = (int)(PaintCanvas.ActualWidth * _zoomScale);
+            int canvasHeight = (int)(PaintCanvas.ActualHeight * _zoomScale);
+
+            var renderTarget = new RenderTargetBitmap(canvasWidth, canvasHeight, 96, 96, PixelFormats.Pbgra32);
+            renderTarget.Render(PaintCanvas);
+
+            var pixels = new byte[canvasWidth * canvasHeight * 4];
+            renderTarget.CopyPixels(pixels, canvasWidth * 4, 0);
+
+            int x = (int)(position.X * _zoomScale);
+            int y = (int)(position.Y * _zoomScale);
+
+            if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight)
+            {
+                MessageBox.Show("Click was made outside of canvas");
+                return;
+            }
+
+            int index = (y * canvasWidth + x) * 4;
+            var targetColor = Color.FromArgb(
+                pixels[index + 3],
+                pixels[index + 2],
+                pixels[index + 1],
+                pixels[index]
+            );
+
+            if (targetColor == fillColor)
+            {
+                MessageBox.Show("Its already the same color");
+                return;
+            }
+
+            FloodFill(pixels, x, y, targetColor, fillColor, canvasWidth, canvasHeight);
+
+            var writeableBitmap = new WriteableBitmap(canvasWidth, canvasHeight, 96, 96, PixelFormats.Pbgra32, null);
+            writeableBitmap.WritePixels(new Int32Rect(0, 0, canvasWidth, canvasHeight), pixels, canvasWidth * 4, 0);
+
+            var image = new Image
+            {
+                Source = writeableBitmap,
+                Width = PaintCanvas.ActualWidth,
+                Height = PaintCanvas.ActualHeight
+            };
+
+            PaintCanvas.Children.Clear();
+            PaintCanvas.Children.Add(image);
+            ViewModel?.SaveState(PaintCanvas);
+        }
+
+        private void FloodFill(byte[] pixels, int x, int y, Color targetColor, Color fillColor, int width, int height)
+        {
+            var stack = new Stack<Point>();
+            stack.Push(new Point(x, y));
+
+            byte targetR = targetColor.R, targetG = targetColor.G, targetB = targetColor.B, targetA = targetColor.A;
+            byte fillR = fillColor.R, fillG = fillColor.G, fillB = fillColor.B, fillA = fillColor.A;
+
+            while (stack.Count > 0)
+            {
+                var point = stack.Pop();
+                int px = (int)point.X, py = (int)point.Y;
+
+                if (px < 0 || px >= width || py < 0 || py >= height)
+                    continue;
+
+                int index = (py * width + px) * 4;
+
+                if (pixels[index] == targetB &&
+                    pixels[index + 1] == targetG &&
+                    pixels[index + 2] == targetR &&
+                    pixels[index + 3] == targetA)
+                {
+                    pixels[index] = fillB;
+                    pixels[index + 1] = fillG;
+                    pixels[index + 2] = fillR;
+                    pixels[index + 3] = fillA;
+
+                    stack.Push(new Point(px + 1, py));
+                    stack.Push(new Point(px - 1, py));
+                    stack.Push(new Point(px, py + 1));
+                    stack.Push(new Point(px, py - 1));
+                }
             }
         }
 

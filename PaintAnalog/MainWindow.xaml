@@ -22,17 +22,17 @@
             <Button Content="Resize Canvas" Click="ResizeCanvas" />
         </ToolBar>
         <ScrollViewer x:Name="CanvasScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="Gray">
-            <Grid>
+            <Canvas>
                 <Canvas x:Name="PaintCanvas" Background="White" Width="800" Height="600"
-                    MouseDown="Canvas_MouseDown"
-                    MouseMove="Canvas_MouseMove"
-                    MouseUp="Canvas_MouseUp"
-                    MouseWheel="Canvas_MouseWheel">
+                MouseDown="Canvas_MouseDown"
+                MouseMove="Canvas_MouseMove"
+                MouseUp="Canvas_MouseUp"
+                MouseWheel="Canvas_MouseWheel">
                     <Canvas.RenderTransform>
                         <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1" />
                     </Canvas.RenderTransform>
                 </Canvas>
-            </Grid>
+            </Canvas>
         </ScrollViewer>
     </DockPanel>
 </Window>

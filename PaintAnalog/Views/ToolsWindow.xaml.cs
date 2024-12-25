@@ -24,5 +24,12 @@ namespace PaintAnalog.Views
             DialogResult = true;
             Close();
         }
+
+        private void FillSelected(object sender, RoutedEventArgs e) 
+        {
+            SelectedTool = "Fill";
+            DialogResult = true;
+            Close();
+        }
     }
 }

@@ -5,5 +5,6 @@
     <StackPanel>
         <Button Content="Brush" Click="BrushSelected" Margin="10" />
         <Button Content="Eraser" Click="EraserSelected" Margin="10" />
+        <Button Content="Fill" Click="FillSelected" Margin="10" />
     </StackPanel>
 </Window>
