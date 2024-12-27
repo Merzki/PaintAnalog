@@ -26,7 +26,7 @@
                 <Canvas x:Name="PaintCanvas" Background="White" Width="800" Height="600"
                 MouseDown="Canvas_MouseDown"
                 MouseMove="Canvas_MouseMove"
-                MouseUp="Canvas_MouseUp"
+                MouseUp="Canvas_MouseUp"      
                 MouseWheel="Canvas_MouseWheel">
                     <Canvas.RenderTransform>
                         <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1" />

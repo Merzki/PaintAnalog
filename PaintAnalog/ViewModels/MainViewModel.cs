@@ -30,6 +30,13 @@ namespace PaintAnalog.ViewModels
             set => SetProperty(ref _selectedColor, value);
         }
 
+        private bool _isEditingImage;
+        public bool IsEditingImage
+        {
+            get => _isEditingImage;
+            set => SetProperty(ref _isEditingImage, value);
+        }
+
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
         public ICommand SaveCanvasCommand { get; }
@@ -101,11 +108,16 @@ namespace PaintAnalog.ViewModels
                 {
                     Source = bitmap,
                     Width = bitmap.Width,
-                    Height = bitmap.Height
+                    Height = bitmap.Height,
+                    IsEnabled = true 
                 };
 
                 Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
                 Canvas.SetTop(image, (canvas.ActualHeight - bitmap.Height) / 2);
+
+                image.MouseLeftButtonDown += Image_MouseLeftButtonDown;
+                image.MouseMove += Image_MouseMove;
+                image.MouseLeftButtonUp += Image_MouseLeftButtonUp;
 
                 canvas.Children.Add(image);
 
@@ -121,6 +133,63 @@ namespace PaintAnalog.ViewModels
                 ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
             }
         }
+
+        private Point _startPoint;
+        private bool _isDragging;
+        private Image _draggedImage;
+
+        private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Image image)
+            {
+                _isDragging = true;
+                _draggedImage = image;
+                _startPoint = e.GetPosition(image);
+
+                IsEditingImage = true;
+
+                image.CaptureMouse();
+            }
+        }
+
+        private void Image_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDragging && _draggedImage != null)
+            {
+                var canvas = VisualTreeHelper.GetParent(_draggedImage) as Canvas;
+                if (canvas != null)
+                {
+                    var currentPoint = e.GetPosition(canvas);
+
+                    Canvas.SetLeft(_draggedImage, currentPoint.X - _startPoint.X);
+                    Canvas.SetTop(_draggedImage, currentPoint.Y - _startPoint.Y);
+                }
+            }
+        }
+
+        private void Image_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _isDragging = false;
+
+                if (_draggedImage != null)
+                {
+                    _draggedImage.ReleaseMouseCapture();
+                    _draggedImage = null;
+
+                    IsEditingImage = false;
+
+                    var adornerLayer = AdornerLayer.GetAdornerLayer(sender as UIElement);
+                    if (adornerLayer != null)
+                    {
+                        var resizeAdorner = new ResizeAdorner(sender as UIElement);
+                        adornerLayer.Add(resizeAdorner);
+                    }
+                }
+            }
+        }
+
 
         private bool CanConfirmChanges(object parameter)
         {

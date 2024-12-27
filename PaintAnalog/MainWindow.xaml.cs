@@ -76,6 +76,11 @@ namespace PaintAnalog
         {
             var position = e.GetPosition(PaintCanvas);
 
+            if (ViewModel?.IsEditingImage == true)
+            {
+                return; 
+            }
+
             if (position.X - _currentThickness / 2 < 0 || position.X + _currentThickness / 2 > PaintCanvas.ActualWidth ||
                 position.Y - _currentThickness / 2 < 0 || position.Y + _currentThickness / 2 > PaintCanvas.ActualHeight)
             {
@@ -134,6 +139,11 @@ namespace PaintAnalog
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var position = e.GetPosition(PaintCanvas);
+
+            if (ViewModel?.IsEditingImage == true)
+            {
+                return;
+            }
 
             if (position.X < 0 || position.X > PaintCanvas.ActualWidth || position.Y < 0 || position.Y > PaintCanvas.ActualHeight)
             {
@@ -262,6 +272,10 @@ namespace PaintAnalog
             int canvasHeight = (int)(PaintCanvas.ActualHeight * _zoomScale);
 
             var renderTarget = new RenderTargetBitmap(canvasWidth, canvasHeight, 96, 96, PixelFormats.Pbgra32);
+
+            RenderOptions.SetBitmapScalingMode(PaintCanvas, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetEdgeMode(PaintCanvas, EdgeMode.Aliased);
+
             renderTarget.Render(PaintCanvas);
 
             var pixels = new byte[canvasWidth * canvasHeight * 4];
@@ -286,7 +300,7 @@ namespace PaintAnalog
 
             if (targetColor == fillColor)
             {
-                MessageBox.Show("Its already the same color");
+                MessageBox.Show("It's already the same color");
                 return;
             }
 
@@ -312,7 +326,6 @@ namespace PaintAnalog
             var stack = new Stack<Point>();
             stack.Push(new Point(x, y));
 
-            byte targetR = targetColor.R, targetG = targetColor.G, targetB = targetColor.B, targetA = targetColor.A;
             byte fillR = fillColor.R, fillG = fillColor.G, fillB = fillColor.B, fillA = fillColor.A;
 
             while (stack.Count > 0)
@@ -325,10 +338,14 @@ namespace PaintAnalog
 
                 int index = (py * width + px) * 4;
 
-                if (pixels[index] == targetB &&
-                    pixels[index + 1] == targetG &&
-                    pixels[index + 2] == targetR &&
-                    pixels[index + 3] == targetA)
+                var currentColor = Color.FromArgb(
+                    pixels[index + 3],  
+                    pixels[index + 2], 
+                    pixels[index + 1],  
+                    pixels[index]      
+                );
+
+                if (AreColorsSimilar(currentColor, targetColor))
                 {
                     pixels[index] = fillB;
                     pixels[index + 1] = fillG;
@@ -341,6 +358,14 @@ namespace PaintAnalog
                     stack.Push(new Point(px, py - 1));
                 }
             }
+        }
+
+        private bool AreColorsSimilar(Color c1, Color c2, int tolerance = 1)
+        {
+            return Math.Abs(c1.R - c2.R) <= tolerance &&
+                   Math.Abs(c1.G - c2.G) <= tolerance &&
+                   Math.Abs(c1.B - c2.B) <= tolerance &&
+                   Math.Abs(c1.A - c2.A) <= tolerance;
         }
 
         private Shape CreateShape(string shapeType, Point startPoint, Point endPoint)
