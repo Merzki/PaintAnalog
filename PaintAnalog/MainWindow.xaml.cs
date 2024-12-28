@@ -81,6 +81,11 @@ namespace PaintAnalog
                 return; 
             }
 
+            if (ViewModel?.IsEditingText == true)
+            {
+                return;
+            }
+
             if (position.X - _currentThickness / 2 < 0 || position.X + _currentThickness / 2 > PaintCanvas.ActualWidth ||
                 position.Y - _currentThickness / 2 < 0 || position.Y + _currentThickness / 2 > PaintCanvas.ActualHeight)
             {
@@ -141,6 +146,11 @@ namespace PaintAnalog
             var position = e.GetPosition(PaintCanvas);
 
             if (ViewModel?.IsEditingImage == true)
+            {
+                return;
+            }
+
+            if (ViewModel?.IsEditingText == true)
             {
                 return;
             }

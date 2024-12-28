@@ -36,6 +36,13 @@ namespace PaintAnalog.ViewModels
             get => _isEditingImage;
             set => SetProperty(ref _isEditingImage, value);
         }
+
+        private bool _isEditingText;
+        public bool IsEditingText
+        {
+            get => _isEditingText;
+            set => SetProperty(ref _isEditingText, value);
+        }
         public ICommand InsertTextCommand { get; }
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
@@ -95,43 +102,37 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null) return;
 
-            var textBox = new TextBox
+            var border = new Border
             {
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(5), 
+                Background = Brushes.Transparent,
                 Width = 200,
                 Height = 30,
-                Text = "",
-                FontSize = 16,
-                Background = Brushes.Transparent,
-                BorderBrush = Brushes.Gray,
-                BorderThickness = new Thickness(1)
-            };
-
-            Canvas.SetLeft(textBox, (canvas.ActualWidth - textBox.Width) / 2);
-            Canvas.SetTop(textBox, (canvas.ActualHeight - textBox.Height) / 2);
-
-            canvas.Children.Add(textBox);
-
-            textBox.LostFocus += (s, e) =>
-            {
-                var textBlock = new TextBlock
+                Child = new TextBox
                 {
-                    Text = textBox.Text,
-                    FontSize = textBox.FontSize,
-                    Foreground = Brushes.Black 
-                };
-
-                Canvas.SetLeft(textBlock, Canvas.GetLeft(textBox));
-                Canvas.SetTop(textBlock, Canvas.GetTop(textBox));
-
-                canvas.Children.Remove(textBox);
-                canvas.Children.Add(textBlock);
-
-                SaveState(canvas);
+                    Text = "",
+                    FontSize = 16,
+                    Background = Brushes.Transparent,
+                    BorderBrush = Brushes.Transparent
+                }
             };
 
-            textBox.Focus();
-        }
+            Canvas.SetLeft(border, (canvas.ActualWidth - border.Width) / 2);
+            Canvas.SetTop(border, (canvas.ActualHeight - border.Height) / 2);
 
+            canvas.Children.Add(border);
+
+            border.MouseLeftButtonDown += Border_MouseLeftButtonDown;
+            border.MouseMove += Border_MouseMove;
+            border.MouseLeftButtonUp += Border_MouseLeftButtonUp;
+
+            (border.Child as TextBox).Focus();
+
+            IsEditingText = true; 
+
+            ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
+        }
 
         public void InsertImage(object parameter)
         {
@@ -153,7 +154,7 @@ namespace PaintAnalog.ViewModels
                     Source = bitmap,
                     Width = bitmap.Width,
                     Height = bitmap.Height,
-                    IsEnabled = true 
+                    IsEnabled = true
                 };
 
                 Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
@@ -234,7 +235,6 @@ namespace PaintAnalog.ViewModels
             }
         }
 
-
         private bool CanConfirmChanges(object parameter)
         {
             var canvas = parameter as Canvas;
@@ -242,6 +242,9 @@ namespace PaintAnalog.ViewModels
 
             foreach (var element in canvas.Children)
             {
+                if (element is Border border && border.Child is TextBox)
+                    return true;
+
                 if (element is Image image)
                 {
                     var adornerLayer = AdornerLayer.GetAdornerLayer(image);
@@ -255,7 +258,8 @@ namespace PaintAnalog.ViewModels
                     }
                 }
             }
-            return false;
+
+            return true;
         }
 
         private void ConfirmChanges(object parameter)
@@ -263,27 +267,78 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null) return;
 
+            var focusedElement = Keyboard.FocusedElement as TextBox;
+            focusedElement?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+
             foreach (var element in canvas.Children)
             {
-                if (element is Image image)
+                if (element is Border border && border.Child is TextBox textBox)
                 {
-                    var adornerLayer = AdornerLayer.GetAdornerLayer(image);
-                    if (adornerLayer != null)
+                    var textBlock = new TextBlock
                     {
-                        var adorners = adornerLayer.GetAdorners(image);
-                        if (adorners != null)
-                        {
-                            foreach (var adorner in adorners)
-                            {
-                                adornerLayer.Remove(adorner);
-                            }
-                        }
-                    }
-                    image.IsEnabled = false;
+                        Text = textBox.Text,
+                        FontSize = textBox.FontSize,
+                        Foreground = Brushes.Black
+                    };
+
+                    border.Child = textBlock;
+
+                    border.MouseLeftButtonDown -= Border_MouseLeftButtonDown;
+                    border.MouseMove -= Border_MouseMove;
+                    border.MouseLeftButtonUp -= Border_MouseLeftButtonUp;
+
+                    border.BorderBrush = Brushes.Transparent;
+                    border.BorderThickness = new Thickness(0);
+                    border.Background = Brushes.Transparent;
                 }
             }
 
+            IsEditingText = false; 
+
+            SaveState(canvas);
+
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
+        }
+
+        private bool isDragging;
+        private Point startPoint;
+        private Border border; 
+
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var border = sender as Border;
+            var canvas = VisualTreeHelper.GetParent(border) as Canvas;
+
+            if (border != null && canvas != null)
+            {
+                isDragging = true;
+                startPoint = e.GetPosition(canvas);
+                border.CaptureMouse();
+            }
+        }
+
+        private void Border_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging && sender is Border border)
+            {
+                var canvas = VisualTreeHelper.GetParent(border) as Canvas;
+                if (canvas != null)
+                {
+                    var currentPoint = e.GetPosition(canvas);
+                    Canvas.SetLeft(border, Canvas.GetLeft(border) + (currentPoint.X - startPoint.X));
+                    Canvas.SetTop(border, Canvas.GetTop(border) + (currentPoint.Y - startPoint.Y));
+                    startPoint = currentPoint;
+                }
+            }
+        }
+
+        private void Border_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging && sender is Border border)
+            {
+                isDragging = false;
+                border.ReleaseMouseCapture();
+            }
         }
 
         private bool _isResizing;
@@ -366,7 +421,7 @@ namespace PaintAnalog.ViewModels
                 Width = 10,
                 Height = 10,
                 Fill = Brushes.Transparent,
-                StrokeThickness = 0,        
+                StrokeThickness = 0,
                 Cursor = Cursors.SizeNWSE
             };
         }
@@ -470,7 +525,7 @@ namespace PaintAnalog.ViewModels
                         if (elementBounds.IsEmpty) continue;
 
                         Point elementPosition = new Point(Canvas.GetLeft(element), Canvas.GetTop(element));
-                        if (double.IsNaN(elementPosition.X)) elementPosition.X = 0; 
+                        if (double.IsNaN(elementPosition.X)) elementPosition.X = 0;
                         if (double.IsNaN(elementPosition.Y)) elementPosition.Y = 0;
 
                         GeneralTransform transform = element.TransformToAncestor(canvas);
