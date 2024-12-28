@@ -36,7 +36,7 @@ namespace PaintAnalog.ViewModels
             get => _isEditingImage;
             set => SetProperty(ref _isEditingImage, value);
         }
-
+        public ICommand InsertTextCommand { get; }
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
         public ICommand SaveCanvasCommand { get; }
@@ -60,6 +60,7 @@ namespace PaintAnalog.ViewModels
                 SaveState(canvas);
             });
             ConfirmChangesCommand = new RelayCommand(ConfirmChanges, CanConfirmChanges);
+            InsertTextCommand = new RelayCommand(InsertText);
         }
 
         private void ChooseColor(object parameter)
@@ -88,6 +89,49 @@ namespace PaintAnalog.ViewModels
                 popup.IsOpen = false;
             };
         }
+
+        private void InsertText(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null) return;
+
+            var textBox = new TextBox
+            {
+                Width = 200,
+                Height = 30,
+                Text = "",
+                FontSize = 16,
+                Background = Brushes.Transparent,
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(1)
+            };
+
+            Canvas.SetLeft(textBox, (canvas.ActualWidth - textBox.Width) / 2);
+            Canvas.SetTop(textBox, (canvas.ActualHeight - textBox.Height) / 2);
+
+            canvas.Children.Add(textBox);
+
+            textBox.LostFocus += (s, e) =>
+            {
+                var textBlock = new TextBlock
+                {
+                    Text = textBox.Text,
+                    FontSize = textBox.FontSize,
+                    Foreground = Brushes.Black 
+                };
+
+                Canvas.SetLeft(textBlock, Canvas.GetLeft(textBox));
+                Canvas.SetTop(textBlock, Canvas.GetTop(textBox));
+
+                canvas.Children.Remove(textBox);
+                canvas.Children.Add(textBlock);
+
+                SaveState(canvas);
+            };
+
+            textBox.Focus();
+        }
+
 
         public void InsertImage(object parameter)
         {
