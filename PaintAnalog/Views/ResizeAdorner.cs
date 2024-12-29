@@ -6,7 +6,7 @@ using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
-namespace PaintAnalog
+namespace PaintAnalog.Views
 {
     public class ResizeAdorner : Adorner
     {

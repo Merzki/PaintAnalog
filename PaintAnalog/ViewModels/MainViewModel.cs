@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Shapes;
 using System.Windows.Documents;
+using PaintAnalog.Views;
 
 namespace PaintAnalog.ViewModels
 {
@@ -42,6 +43,13 @@ namespace PaintAnalog.ViewModels
         {
             get => _isEditingText;
             set => SetProperty(ref _isEditingText, value);
+        }
+
+        private double _textSize = 16; 
+        public double TextSize
+        {
+            get => _textSize;
+            set => SetProperty(ref _textSize, value);
         }
         public ICommand InsertTextCommand { get; }
         public ICommand ClearCanvasCommand { get; }
@@ -102,24 +110,56 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null) return;
 
-            var border = new Border
+            var textBox = new TextBox
             {
-                BorderBrush = Brushes.Gray,
-                BorderThickness = new Thickness(5), 
+                Text = "",
+                FontSize = TextSize,
                 Background = Brushes.Transparent,
-                Width = 200,
-                Height = 30,
-                Child = new TextBox
+                BorderBrush = Brushes.Transparent,
+                Foreground = SelectedColor,
+                AcceptsReturn = true,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+                MinWidth = 50,
+                MinHeight = 30
+            };
+
+            textBox.TextChanged += (s, e) =>
+            {
+                var tb = s as TextBox;
+                if (tb != null)
                 {
-                    Text = "",
-                    FontSize = 16,
-                    Background = Brushes.Transparent,
-                    BorderBrush = Brushes.Transparent
+                    var formattedText = new FormattedText(
+                        tb.Text,
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        FlowDirection.LeftToRight,
+                        new Typeface(tb.FontFamily, tb.FontStyle, tb.FontWeight, tb.FontStretch),
+                        tb.FontSize,
+                        Brushes.Black,
+                        VisualTreeHelper.GetDpi(tb).PixelsPerDip);
+
+                    if (formattedText.WidthIncludingTrailingWhitespace > tb.Width - 10)
+                    {
+                        tb.Width = Math.Max(tb.MinWidth, formattedText.WidthIncludingTrailingWhitespace + 10);
+                    }
+
+                    if (formattedText.Height > tb.Height - 10)
+                    {
+                        tb.Height = Math.Max(tb.MinHeight, formattedText.Height + 10);
+                    }
                 }
             };
 
-            Canvas.SetLeft(border, (canvas.ActualWidth - border.Width) / 2);
-            Canvas.SetTop(border, (canvas.ActualHeight - border.Height) / 2);
+            var border = new Border
+            {
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(1),
+                Background = Brushes.Transparent,
+                Child = textBox
+            };
+
+            Canvas.SetLeft(border, (canvas.ActualWidth - 100) / 2);
+            Canvas.SetTop(border, (canvas.ActualHeight - 30) / 2);
 
             canvas.Children.Add(border);
 
@@ -127,12 +167,14 @@ namespace PaintAnalog.ViewModels
             border.MouseMove += Border_MouseMove;
             border.MouseLeftButtonUp += Border_MouseLeftButtonUp;
 
-            (border.Child as TextBox).Focus();
+            textBox.Focus();
+            IsEditingText = true;
 
-            IsEditingText = true; 
+            SaveState(canvas); 
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
+
 
         public void InsertImage(object parameter)
         {
@@ -278,7 +320,7 @@ namespace PaintAnalog.ViewModels
                     {
                         Text = textBox.Text,
                         FontSize = textBox.FontSize,
-                        Foreground = Brushes.Black
+                        Foreground = SelectedColor
                     };
 
                     border.Child = textBlock;
@@ -302,7 +344,7 @@ namespace PaintAnalog.ViewModels
 
         private bool isDragging;
         private Point startPoint;
-        private Border border; 
+        private Border border;
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -313,6 +355,8 @@ namespace PaintAnalog.ViewModels
             {
                 isDragging = true;
                 startPoint = e.GetPosition(canvas);
+
+                border.BorderThickness = new Thickness(3);
                 border.CaptureMouse();
             }
         }
@@ -325,9 +369,13 @@ namespace PaintAnalog.ViewModels
                 if (canvas != null)
                 {
                     var currentPoint = e.GetPosition(canvas);
-                    Canvas.SetLeft(border, Canvas.GetLeft(border) + (currentPoint.X - startPoint.X));
-                    Canvas.SetTop(border, Canvas.GetTop(border) + (currentPoint.Y - startPoint.Y));
-                    startPoint = currentPoint;
+                    var offsetX = currentPoint.X - startPoint.X;
+                    var offsetY = currentPoint.Y - startPoint.Y;
+
+                    Canvas.SetLeft(border, Canvas.GetLeft(border) + offsetX);
+                    Canvas.SetTop(border, Canvas.GetTop(border) + offsetY);
+
+                    startPoint = currentPoint; 
                 }
             }
         }
@@ -339,6 +387,23 @@ namespace PaintAnalog.ViewModels
                 isDragging = false;
                 border.ReleaseMouseCapture();
             }
+        }
+
+        private void AddBorderEventHandlers(Border border)
+        {
+            border.MouseEnter += (s, e) =>
+            {
+                border.BorderBrush = Brushes.Blue; 
+            };
+
+            border.MouseLeave += (s, e) =>
+            {
+                border.BorderBrush = Brushes.Gray; 
+            };
+
+            border.MouseLeftButtonDown += Border_MouseLeftButtonDown;
+            border.MouseMove += Border_MouseMove;
+            border.MouseLeftButtonUp += Border_MouseLeftButtonUp;
         }
 
         private bool _isResizing;

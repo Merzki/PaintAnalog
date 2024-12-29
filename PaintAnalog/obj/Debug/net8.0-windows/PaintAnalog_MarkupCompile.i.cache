@@ -12,9 +12,9 @@ TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\ASUS\source\repos\PaintAnalog\PaintAnalog\App.xaml
 51014780907
 
-141342460381
+141454450270
 2031107992608
 MainWindow.xaml;Views\EraserSettingsWindow.xaml;Views\PenSettingsWindow.xaml;Views\ResizeCanvasDialog.xaml;Views\ToolsWindow.xaml;
 
-True
+False
 
