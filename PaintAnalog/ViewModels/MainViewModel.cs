@@ -14,13 +14,13 @@ using System.ComponentModel;
 
 namespace PaintAnalog.ViewModels
 {
-    public class MainViewModel : ViewModelBase, INotifyPropertyChanged
+    public class MainViewModel : ViewModelBase
     {
         private string _title = "Paint Analog";
         private SolidColorBrush _selectedColor = new SolidColorBrush(Colors.Black);
         private readonly Stack<UIElement[]> _undoElements = new();
         private readonly Stack<UIElement[]> _redoElements = new();
-        private double _textSize = 16;
+        private double _textSize = 12;
         private FontFamily _selectedFontFamily = new FontFamily("Segoe UI");
 
         public string Title
@@ -101,10 +101,6 @@ namespace PaintAnalog.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
         public ICommand InsertTextCommand { get; }
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
@@ -219,6 +215,8 @@ namespace PaintAnalog.ViewModels
 
             Canvas.SetLeft(border, (canvas.ActualWidth - 100) / 2);
             Canvas.SetTop(border, (canvas.ActualHeight - 30) / 2);
+
+            SaveState(canvas);  
 
             canvas.Children.Add(border);
 
@@ -352,14 +350,12 @@ namespace PaintAnalog.ViewModels
                     {
                         var adorners = adornerLayer.GetAdorners(image);
                         if (adorners != null && adorners.Length > 0)
-                        {
                             return true;
-                        }
                     }
                 }
             }
 
-            return true;
+            return false;
         }
 
         private void ConfirmChanges(object parameter)
@@ -378,8 +374,8 @@ namespace PaintAnalog.ViewModels
                     {
                         Text = textBox.Text,
                         FontSize = textBox.FontSize,
-                        FontFamily = SelectedFontFamily,
-                        Foreground = SelectedColor,
+                        FontFamily = textBox.FontFamily,
+                        Foreground = textBox.Foreground,
                         FontWeight = textBox.FontWeight,
                         FontStyle = textBox.FontStyle,
                         TextDecorations = textBox.TextDecorations
@@ -395,14 +391,36 @@ namespace PaintAnalog.ViewModels
                     border.BorderThickness = new Thickness(0);
                     border.Background = Brushes.Transparent;
                 }
+
+                if (element is Image image)
+                {
+                    var adornerLayer = AdornerLayer.GetAdornerLayer(image);
+                    if (adornerLayer != null)
+                    {
+                        var adorners = adornerLayer.GetAdorners(image);
+                        if (adorners != null)
+                        {
+                            foreach (var adorner in adorners)
+                            {
+                                adornerLayer.Remove(adorner);
+                            }
+                        }
+                    }
+
+                    image.MouseLeftButtonDown -= Image_MouseLeftButtonDown;
+                    image.MouseMove -= Image_MouseMove;
+                    image.MouseLeftButtonUp -= Image_MouseLeftButtonUp;
+                }
             }
 
-            IsEditingText = false; 
+            IsEditingText = false;
+            IsEditingImage = false;
 
             SaveState(canvas);
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
+
 
         private bool isDragging;
         private Point startPoint;

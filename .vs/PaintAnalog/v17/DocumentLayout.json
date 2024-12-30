@@ -11,16 +11,16 @@
       "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\views\\erasersettingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\views\\erasersettingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\viewmodels\\viewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\viewmodels\\viewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\views\\erasersettingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\views\\erasersettingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\views\\erasersettingswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -104,7 +104,7 @@
               "RelativeDocumentMoniker": "PaintAnalog\\ViewModels\\MainViewModel.cs",
               "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\ViewModels\\MainViewModel.cs",
               "RelativeToolTip": "PaintAnalog\\ViewModels\\MainViewModel.cs",
-              "ViewState": "AQIAADwBAAAAAAAAAAAhwH4BAAA4AAAA",
+              "ViewState": "AQIAANsBAAAAAAAAAAAIwNcAAAA/AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-11T04:48:06.381Z",
               "EditorCaption": ""
@@ -117,14 +117,13 @@
               "RelativeDocumentMoniker": "PaintAnalog\\ViewModels\\ViewModelBase.cs",
               "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\ViewModels\\ViewModelBase.cs",
               "RelativeToolTip": "PaintAnalog\\ViewModels\\ViewModelBase.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABcAAAABAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-11T04:47:10.101Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-11T04:47:10.101Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "EraserSettingsWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\EraserSettingsWindow.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Views\\EraserSettingsWindow.xaml.cs",
@@ -132,8 +131,7 @@
               "RelativeToolTip": "PaintAnalog\\Views\\EraserSettingsWindow.xaml.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABwAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-23T23:06:13.339Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-23T23:06:13.339Z"
             },
             {
               "$type": "Document",
@@ -160,15 +158,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\MainWindow.xaml.cs",
               "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\MainWindow.xaml.cs",
               "RelativeToolTip": "PaintAnalog\\MainWindow.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAAAAAA",
+              "ViewState": "AQIAAAEAAAAAAAAAAAAkwCwAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-11T04:44:47.942Z"
+              "WhenOpened": "2024-12-11T04:44:47.942Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
