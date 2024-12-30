@@ -60,7 +60,7 @@ namespace PaintAnalog.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/PaintAnalog;V1.0.0.0;component/views/erasersettingswindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/PaintAnalog;component/views/erasersettingswindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\EraserSettingsWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

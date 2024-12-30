@@ -24,6 +24,28 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Text Size:" Margin="5,0,5,0" VerticalAlignment="Center"/>
                 <Slider Minimum="8" Maximum="96" Value="{Binding TextSize}" Width="150" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TextSize}" Margin="5,0,5,0" VerticalAlignment="Center" />
+                <ComboBox Width="150" SelectedItem="{Binding SelectedFontFamily}">
+                    <ComboBox.ItemsSource>
+                        <CompositeCollection>
+                            <FontFamily>Segoe UI</FontFamily>
+                            <FontFamily>Arial</FontFamily>
+                            <FontFamily>Times New Roman</FontFamily>
+                            <FontFamily>Comic Sans MS</FontFamily>
+                        </CompositeCollection>
+                    </ComboBox.ItemsSource>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                <ToggleButton Width="40" Height="30" IsChecked="{Binding IsBold}" ToolTip="Bold (Ctrl+B)">
+                    <TextBlock Text="B" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </ToggleButton>
+                <ToggleButton Width="40" Height="30" IsChecked="{Binding IsItalic}" ToolTip="Italic (Ctrl+I)">
+                    <TextBlock Text="I" FontStyle="Italic" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </ToggleButton>
+                <ToggleButton Width="40" Height="30" IsChecked="{Binding IsUnderline}" ToolTip="Underline (Ctrl+U)">
+                    <TextBlock Text="U" TextDecorations="Underline" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </ToggleButton>
             </StackPanel>
         </ToolBar>
         <ScrollViewer x:Name="CanvasScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="Gray">

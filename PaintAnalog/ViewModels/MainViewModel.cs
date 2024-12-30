@@ -9,15 +9,19 @@ using System.Windows;
 using System.Windows.Shapes;
 using System.Windows.Documents;
 using PaintAnalog.Views;
+using System.Runtime.CompilerServices;
+using System.ComponentModel;
 
 namespace PaintAnalog.ViewModels
 {
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : ViewModelBase, INotifyPropertyChanged
     {
         private string _title = "Paint Analog";
         private SolidColorBrush _selectedColor = new SolidColorBrush(Colors.Black);
         private readonly Stack<UIElement[]> _undoElements = new();
         private readonly Stack<UIElement[]> _redoElements = new();
+        private double _textSize = 16;
+        private FontFamily _selectedFontFamily = new FontFamily("Segoe UI");
 
         public string Title
         {
@@ -44,12 +48,62 @@ namespace PaintAnalog.ViewModels
             get => _isEditingText;
             set => SetProperty(ref _isEditingText, value);
         }
-
-        private double _textSize = 16; 
         public double TextSize
         {
             get => _textSize;
-            set => SetProperty(ref _textSize, value);
+            set
+            {
+                var roundedValue = Math.Round(value); 
+                if (_textSize != roundedValue)
+                {
+                    SetProperty(ref _textSize, roundedValue);
+                }
+            }
+        }
+        public FontFamily SelectedFontFamily
+        {
+            get => _selectedFontFamily;
+            set => SetProperty(ref _selectedFontFamily, value);
+        }
+
+        private bool _isBold;
+        public bool IsBold
+        {
+            get => _isBold;
+            set
+            {
+                _isBold = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isItalic;
+        public bool IsItalic
+        {
+            get => _isItalic;
+            set
+            {
+                _isItalic = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isUnderline;
+        public bool IsUnderline
+        {
+            get => _isUnderline;
+            set
+            {
+                _isUnderline = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public ICommand InsertTextCommand { get; }
         public ICommand ClearCanvasCommand { get; }
@@ -114,6 +168,7 @@ namespace PaintAnalog.ViewModels
             {
                 Text = "",
                 FontSize = TextSize,
+                FontFamily = SelectedFontFamily,
                 Background = Brushes.Transparent,
                 BorderBrush = Brushes.Transparent,
                 Foreground = SelectedColor,
@@ -123,6 +178,10 @@ namespace PaintAnalog.ViewModels
                 MinWidth = 50,
                 MinHeight = 30
             };
+
+            textBox.FontWeight = IsBold ? FontWeights.Bold : FontWeights.Normal;
+            textBox.FontStyle = IsItalic ? FontStyles.Italic : FontStyles.Normal;
+            textBox.TextDecorations = IsUnderline ? TextDecorations.Underline : null;
 
             textBox.TextChanged += (s, e) =>
             {
@@ -170,11 +229,10 @@ namespace PaintAnalog.ViewModels
             textBox.Focus();
             IsEditingText = true;
 
-            SaveState(canvas); 
+            SaveState(canvas);
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
-
 
         public void InsertImage(object parameter)
         {
@@ -320,7 +378,11 @@ namespace PaintAnalog.ViewModels
                     {
                         Text = textBox.Text,
                         FontSize = textBox.FontSize,
-                        Foreground = SelectedColor
+                        FontFamily = SelectedFontFamily,
+                        Foreground = SelectedColor,
+                        FontWeight = textBox.FontWeight,
+                        FontStyle = textBox.FontStyle,
+                        TextDecorations = textBox.TextDecorations
                     };
 
                     border.Child = textBlock;
