@@ -15,7 +15,7 @@ namespace PaintAnalog
         private Point _startPoint;
         private Shape _currentShapeElement;
 
-        private UIElement _selectedElement; 
+        private UIElement _selectedElement;
         private Point _elementStartPoint;
         private Point _canvasStartOffset;
 
@@ -76,23 +76,8 @@ namespace PaintAnalog
         {
             var position = e.GetPosition(PaintCanvas);
 
-            if (ViewModel?.IsEditingImage == true)
+            if (ViewModel?.IsEditingImage == true || ViewModel?.IsEditingText == true)
             {
-                return; 
-            }
-
-            if (ViewModel?.IsEditingText == true)
-            {
-                return;
-            }
-
-            if (position.X - _currentThickness / 2 < 0 || position.X + _currentThickness / 2 > PaintCanvas.ActualWidth ||
-                position.Y - _currentThickness / 2 < 0 || position.Y + _currentThickness / 2 > PaintCanvas.ActualHeight)
-            {
-                if (_eraserCursor != null)
-                {
-                    _eraserCursor.Visibility = Visibility.Collapsed;
-                }
                 return;
             }
 
@@ -105,34 +90,20 @@ namespace PaintAnalog
                     Fill = Brushes.Transparent,
                     Visibility = Visibility.Visible
                 };
-
                 PaintCanvas.Children.Add(_eraserCursor);
             }
 
-            Canvas.SetLeft(_eraserCursor, position.X - _currentThickness / 2);
-            Canvas.SetTop(_eraserCursor, position.Y - _currentThickness / 2);
+            double adjustedX = Math.Max(0, Math.Min(PaintCanvas.ActualWidth - _currentThickness, position.X - _currentThickness / 2));
+            double adjustedY = Math.Max(0, Math.Min(PaintCanvas.ActualHeight - _currentThickness, position.Y - _currentThickness / 2));
 
-            foreach (UIElement child in PaintCanvas.Children)
-            {
-                Panel.SetZIndex(child, 0);
-            }
-            Panel.SetZIndex(_eraserCursor, 1);
+            Canvas.SetLeft(_eraserCursor, adjustedX);
+            Canvas.SetTop(_eraserCursor, adjustedY);
 
             if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
             {
-                if (_currentTool == "Eraser")
+                if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
                 {
-                    var eraserElement = new Rectangle
-                    {
-                        Fill = Brushes.White,
-                        Width = _currentThickness,
-                        Height = _currentThickness
-                    };
-
-                    Canvas.SetLeft(eraserElement, position.X - _currentThickness / 2);
-                    Canvas.SetTop(eraserElement, position.Y - _currentThickness / 2);
-
-                    PaintCanvas.Children.Add(eraserElement);
+                    eraserPolyline.Points.Add(position);
                 }
                 else
                 {
@@ -145,20 +116,14 @@ namespace PaintAnalog
         {
             var position = e.GetPosition(PaintCanvas);
 
-            if (ViewModel?.IsEditingImage == true)
+            if (ViewModel?.IsEditingImage == true || ViewModel?.IsEditingText == true)
             {
                 return;
             }
 
-            if (ViewModel?.IsEditingText == true)
-            {
-                return;
-            }
-
-            if (position.X < 0 || position.X > PaintCanvas.ActualWidth || position.Y < 0 || position.Y > PaintCanvas.ActualHeight)
-            {
-                return;
-            }
+            double adjustedX = Math.Max(0, Math.Min(PaintCanvas.ActualWidth - _currentThickness / 2, position.X));
+            double adjustedY = Math.Max(0, Math.Min(PaintCanvas.ActualHeight - _currentThickness / 2, position.Y));
+            position = new Point(adjustedX, adjustedY);
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
@@ -167,17 +132,16 @@ namespace PaintAnalog
                     _isDrawing = true;
                     _startPoint = position;
 
-                    var eraserElement = new Rectangle
+                    var eraserPolyline = new Polyline
                     {
-                        Fill = Brushes.White,
-                        Width = _currentThickness,
-                        Height = _currentThickness
+                        Stroke = Brushes.White,
+                        StrokeThickness = _currentThickness
                     };
 
-                    Canvas.SetLeft(eraserElement, position.X - _currentThickness / 2);
-                    Canvas.SetTop(eraserElement, position.Y - _currentThickness / 2);
+                    eraserPolyline.Points.Add(position);
+                    _currentShapeElement = eraserPolyline;
 
-                    PaintCanvas.Children.Add(eraserElement);
+                    PaintCanvas.Children.Add(eraserPolyline);
                 }
                 else if (_currentTool == "Fill")
                 {
@@ -199,6 +163,7 @@ namespace PaintAnalog
             }
         }
 
+
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDrawing && e.LeftButton == MouseButtonState.Released)
@@ -206,10 +171,7 @@ namespace PaintAnalog
                 _isDrawing = false;
                 _currentShapeElement = null;
 
-                if (_currentTool != "Eraser")
-                {
-                    ViewModel?.SaveState(PaintCanvas);
-                }
+                ViewModel?.SaveState(PaintCanvas);
             }
         }
 
@@ -220,8 +182,8 @@ namespace PaintAnalog
             var toolsWindow = new ToolsWindow();
             if (toolsWindow.ShowDialog() == true)
             {
-                _currentTool = toolsWindow.SelectedTool; 
-                UpdateToolSettingsButton(); 
+                _currentTool = toolsWindow.SelectedTool;
+                UpdateToolSettingsButton();
             }
         }
 
@@ -349,10 +311,10 @@ namespace PaintAnalog
                 int index = (py * width + px) * 4;
 
                 var currentColor = Color.FromArgb(
-                    pixels[index + 3],  
-                    pixels[index + 2], 
-                    pixels[index + 1],  
-                    pixels[index]      
+                    pixels[index + 3],
+                    pixels[index + 2],
+                    pixels[index + 1],
+                    pixels[index]
                 );
 
                 if (AreColorsSimilar(currentColor, targetColor))
@@ -411,7 +373,7 @@ namespace PaintAnalog
                         Stroke = Brushes.Black,
                         StrokeThickness = _currentThickness,
                         Fill = Brushes.Transparent,
-                        Points = new PointCollection { startPoint, startPoint, startPoint } 
+                        Points = new PointCollection { startPoint, startPoint, startPoint }
                     };
                 default:
                     return new Rectangle
@@ -459,20 +421,20 @@ namespace PaintAnalog
             else if (shape is Polygon polygon && _currentShape == "Triangle")
             {
                 var baseMidpoint = new Point(
-                    (startPoint.X + endPoint.X) / 2, 
-                    endPoint.Y 
+                    (startPoint.X + endPoint.X) / 2,
+                    endPoint.Y
                 );
 
-                var height = Math.Abs(endPoint.X - startPoint.X) / 2; 
+                var height = Math.Abs(endPoint.X - startPoint.X) / 2;
                 var vertex = new Point(
-                    baseMidpoint.X, 
-                    startPoint.Y - height 
+                    baseMidpoint.X,
+                    startPoint.Y - height
                 );
 
                 polygon.Points.Clear();
-                polygon.Points.Add(startPoint);  
-                polygon.Points.Add(endPoint);    
-                polygon.Points.Add(vertex);      
+                polygon.Points.Add(startPoint);
+                polygon.Points.Add(endPoint);
+                polygon.Points.Add(vertex);
             }
         }
     }

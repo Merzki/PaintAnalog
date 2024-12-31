@@ -52,18 +52,22 @@
                 </ToggleButton>
             </StackPanel>
         </ToolBar>
-        <ScrollViewer x:Name="CanvasScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="Gray">
-            <Canvas>
+        <ScrollViewer x:Name="CanvasScrollViewer" 
+              HorizontalScrollBarVisibility="Auto" 
+              VerticalScrollBarVisibility="Auto" 
+              Background="Gray">
+            <Grid>
                 <Canvas x:Name="PaintCanvas" Background="White" Width="1200" Height="800"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
                 MouseDown="Canvas_MouseDown"
                 MouseMove="Canvas_MouseMove"
                 MouseUp="Canvas_MouseUp"      
                 MouseWheel="Canvas_MouseWheel">
-                    <Canvas.RenderTransform>
-                        <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1" />
-                    </Canvas.RenderTransform>
+                    <Canvas.LayoutTransform>
+                        <ScaleTransform x:Name="CanvasScaleTransform" />
+                    </Canvas.LayoutTransform>
                 </Canvas>
-            </Canvas>
+            </Grid>
         </ScrollViewer>
     </DockPanel>
 </Window>
