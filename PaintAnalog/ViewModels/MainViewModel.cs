@@ -11,6 +11,8 @@ using System.Windows.Documents;
 using PaintAnalog.Views;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
+using WpfRichTextBox = System.Windows.Controls.RichTextBox;
+using XceedRichTextBox = Xceed.Wpf.Toolkit.RichTextBox;
 
 namespace PaintAnalog.ViewModels
 {
@@ -125,7 +127,7 @@ namespace PaintAnalog.ViewModels
                 SaveState(canvas);
             });
             ConfirmChangesCommand = new RelayCommand(ConfirmChanges, CanConfirmChanges);
-            InsertTextCommand = new RelayCommand(InsertText);
+            InsertTextCommand = new RelayCommand(InsertRichText);
         }
 
         private void ChooseColor(object parameter)
@@ -155,54 +157,26 @@ namespace PaintAnalog.ViewModels
             };
         }
 
-        private void InsertText(object parameter)
+        private void InsertRichText(object parameter)
         {
             var canvas = parameter as Canvas;
             if (canvas == null) return;
 
-            var textBox = new TextBox
+            var richTextBox = new WpfRichTextBox
             {
-                Text = "",
                 FontSize = TextSize,
                 FontFamily = SelectedFontFamily,
                 Background = Brushes.Transparent,
-                BorderBrush = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
                 Foreground = SelectedColor,
                 AcceptsReturn = true,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top,
-                MinWidth = 50,
-                MinHeight = 30
-            };
-
-            textBox.FontWeight = IsBold ? FontWeights.Bold : FontWeights.Normal;
-            textBox.FontStyle = IsItalic ? FontStyles.Italic : FontStyles.Normal;
-            textBox.TextDecorations = IsUnderline ? TextDecorations.Underline : null;
-
-            textBox.TextChanged += (s, e) =>
-            {
-                var tb = s as TextBox;
-                if (tb != null)
-                {
-                    var formattedText = new FormattedText(
-                        tb.Text,
-                        System.Globalization.CultureInfo.CurrentCulture,
-                        FlowDirection.LeftToRight,
-                        new Typeface(tb.FontFamily, tb.FontStyle, tb.FontWeight, tb.FontStretch),
-                        tb.FontSize,
-                        Brushes.Black,
-                        VisualTreeHelper.GetDpi(tb).PixelsPerDip);
-
-                    if (formattedText.WidthIncludingTrailingWhitespace > tb.Width - 10)
-                    {
-                        tb.Width = Math.Max(tb.MinWidth, formattedText.WidthIncludingTrailingWhitespace + 10);
-                    }
-
-                    if (formattedText.Height > tb.Height - 10)
-                    {
-                        tb.Height = Math.Max(tb.MinHeight, formattedText.Height + 10);
-                    }
-                }
+                MinWidth = 100,
+                MinHeight = 50,
+                Padding = new Thickness(2),
+                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
             };
 
             var border = new Border
@@ -210,26 +184,100 @@ namespace PaintAnalog.ViewModels
                 BorderBrush = Brushes.Gray,
                 BorderThickness = new Thickness(1),
                 Background = Brushes.Transparent,
-                Child = textBox
+                Child = richTextBox
             };
 
-            Canvas.SetLeft(border, (canvas.ActualWidth - 100) / 2);
-            Canvas.SetTop(border, (canvas.ActualHeight - 30) / 2);
+            Canvas.SetLeft(border, (canvas.ActualWidth - 200) / 2);
+            Canvas.SetTop(border, (canvas.ActualHeight - 50) / 2);
 
-            SaveState(canvas);  
-
+            SaveState(canvas);
             canvas.Children.Add(border);
 
             border.MouseLeftButtonDown += Border_MouseLeftButtonDown;
             border.MouseMove += Border_MouseMove;
             border.MouseLeftButtonUp += Border_MouseLeftButtonUp;
 
-            textBox.Focus();
+            richTextBox.PreviewTextInput += (s, e) =>
+            {
+                var rtb = s as WpfRichTextBox;
+                if (rtb == null) return;
+
+                var caretPos = rtb.CaretPosition;
+                if (caretPos.Paragraph == null)
+                {
+                    caretPos = rtb.Document.Blocks.FirstBlock.ContentEnd;
+                }
+
+                var run = new Run(e.Text)
+                {
+                    Foreground = SelectedColor,
+                    FontSize = TextSize,
+                    FontFamily = SelectedFontFamily,
+                    FontWeight = IsBold ? FontWeights.Bold : FontWeights.Normal,
+                    FontStyle = IsItalic ? FontStyles.Italic : FontStyles.Normal,
+                    TextDecorations = IsUnderline ? TextDecorations.Underline : null
+                };
+
+                caretPos.InsertTextInRun(""); 
+                caretPos.Paragraph.Inlines.Add(run);
+                rtb.CaretPosition = run.ContentEnd;
+                e.Handled = true;
+
+                AutoResizeRichTextBox(rtb, border);
+            };
+
+            richTextBox.TextChanged += (s, e) =>
+            {
+                AutoResizeRichTextBox(richTextBox, border);
+            };
+
+            richTextBox.Focus();
             IsEditingText = true;
 
             SaveState(canvas);
-
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
+        }
+
+        private void AutoResizeRichTextBox(WpfRichTextBox rtb, Border border)
+        {
+            rtb.Width = double.NaN;
+            rtb.Height = double.NaN;
+            rtb.Document.PageWidth = 10000;
+            rtb.UpdateLayout();
+
+            rtb.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+
+            double maxWidth = 0;
+            double maxHeight = 0;
+
+            var pointer = rtb.Document.ContentStart;
+
+            while (pointer != null && pointer.CompareTo(rtb.Document.ContentEnd) < 0)
+            {
+                var next = pointer.GetNextContextPosition(LogicalDirection.Forward);
+                if (next == null) break;
+
+                try
+                {
+                    var rect = pointer.GetCharacterRect(LogicalDirection.Forward);
+                    if (rect.Right > maxWidth) maxWidth = rect.Right;
+                    if (rect.Bottom > maxHeight) maxHeight = rect.Bottom;
+                }
+                catch
+                {
+
+                }
+
+                pointer = next;
+            }
+
+            double newWidth = Math.Max(rtb.MinWidth, maxWidth + 20);
+            double newHeight = Math.Max(rtb.MinHeight, maxHeight + 10);
+
+            border.Width = newWidth;
+            border.Height = newHeight;
+            rtb.Width = newWidth;
+            rtb.Height = newHeight;
         }
 
         public void InsertImage(object parameter)
@@ -340,7 +388,7 @@ namespace PaintAnalog.ViewModels
 
             foreach (var element in canvas.Children)
             {
-                if (element is Border border && border.Child is TextBox)
+                if (element is Border border && border.Child is System.Windows.Controls.RichTextBox richTextBox && !richTextBox.IsReadOnly)
                     return true;
 
                 if (element is Image image)
@@ -368,20 +416,15 @@ namespace PaintAnalog.ViewModels
 
             foreach (var element in canvas.Children)
             {
-                if (element is Border border && border.Child is TextBox textBox)
+                if (element is Border border && border.Child is System.Windows.Controls.RichTextBox richTextBox)
                 {
-                    var textBlock = new TextBlock
-                    {
-                        Text = textBox.Text,
-                        FontSize = textBox.FontSize,
-                        FontFamily = textBox.FontFamily,
-                        Foreground = textBox.Foreground,
-                        FontWeight = textBox.FontWeight,
-                        FontStyle = textBox.FontStyle,
-                        TextDecorations = textBox.TextDecorations
-                    };
-
-                    border.Child = textBlock;
+                    richTextBox.IsReadOnly = true;
+                    richTextBox.Background = Brushes.Transparent;
+                    richTextBox.BorderThickness = new Thickness(0);
+                    richTextBox.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                    richTextBox.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                    richTextBox.Focusable = false;
+                    richTextBox.Cursor = Cursors.Arrow;
 
                     border.MouseLeftButtonDown -= Border_MouseLeftButtonDown;
                     border.MouseMove -= Border_MouseMove;
@@ -389,7 +432,6 @@ namespace PaintAnalog.ViewModels
 
                     border.BorderBrush = Brushes.Transparent;
                     border.BorderThickness = new Thickness(0);
-                    border.Background = Brushes.Transparent;
                 }
 
                 if (element is Image image)
@@ -420,7 +462,6 @@ namespace PaintAnalog.ViewModels
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
-
 
         private bool isDragging;
         private Point startPoint;
