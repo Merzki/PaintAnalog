@@ -14,6 +14,9 @@ namespace PaintAnalog
         private bool _isDrawing;
         private Point _startPoint;
         private Shape _currentShapeElement;
+        private List<Point> _pointBuffer = new List<Point>();
+        private List<Point> _pendingPoints = new List<Point>();
+        private const double InterpolationStep = 1.0;
 
         private UIElement _selectedElement;
         private Point _elementStartPoint;
@@ -31,9 +34,22 @@ namespace PaintAnalog
         {
             InitializeComponent();
             UpdateToolSettingsButton();
+            CompositionTarget.Rendering += OnRendering;
 
             Canvas.SetLeft(PaintCanvas, 0);
             Canvas.SetTop(PaintCanvas, 0);
+        }
+
+        private void OnRendering(object sender, EventArgs e)
+        {
+            if (_currentShapeElement is Polyline polyline && _pendingPoints.Count > 0)
+            {
+                foreach (var point in _pendingPoints)
+                {
+                    polyline.Points.Add(point);
+                }
+                _pendingPoints.Clear();
+            }
         }
 
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -75,41 +91,47 @@ namespace PaintAnalog
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             var position = e.GetPosition(PaintCanvas);
+            if (!_isDrawing || e.LeftButton != MouseButtonState.Pressed) return;
 
-            if (ViewModel?.IsEditingImage == true || ViewModel?.IsEditingText == true)
+            if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
             {
-                return;
-            }
+                _pointBuffer.Add(position);
 
-            if (_eraserCursor == null)
-            {
-                _eraserCursor = new Rectangle
+                if (_pointBuffer.Count >= 2) 
                 {
-                    Width = _currentThickness,
-                    Height = _currentThickness,
-                    Fill = Brushes.Transparent,
-                    Visibility = Visibility.Visible
-                };
-                PaintCanvas.Children.Add(_eraserCursor);
-            }
-
-            double adjustedX = Math.Max(0, Math.Min(PaintCanvas.ActualWidth - _currentThickness, position.X - _currentThickness / 2));
-            double adjustedY = Math.Max(0, Math.Min(PaintCanvas.ActualHeight - _currentThickness, position.Y - _currentThickness / 2));
-
-            Canvas.SetLeft(_eraserCursor, adjustedX);
-            Canvas.SetTop(_eraserCursor, adjustedY);
-
-            if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
-                {
-                    eraserPolyline.Points.Add(position);
-                }
-                else
-                {
-                    UpdateShape(_currentShapeElement, _startPoint, position);
+                    var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep / 2.0); 
+                    foreach (var point in smoothPoints)
+                    {
+                        (eraserPolyline as Polyline)?.Points.Add(point);
+                    }
+                    _pointBuffer.Clear();
+                    _pointBuffer.Add(position);
                 }
             }
+            else if (_currentTool == "Brush" && _currentShapeElement is Polyline brushPolyline)
+            {
+                _pointBuffer.Add(position);
+
+                if (_pointBuffer.Count >= 2)
+                {
+                    var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep);
+                    foreach (var point in smoothPoints)
+                    {
+                        brushPolyline.Points.Add(point);
+                    }
+                    _pointBuffer.Clear();
+                    _pointBuffer.Add(position);
+                }
+            }
+            else
+            {
+                UpdateShape(_currentShapeElement, _startPoint, position);
+            }
+        }
+
+        private double GetDistance(Point p1, Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
         }
 
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -170,10 +192,40 @@ namespace PaintAnalog
             {
                 _isDrawing = false;
                 _currentShapeElement = null;
+                _pointBuffer.Clear();
 
                 ViewModel?.SaveState(PaintCanvas);
             }
         }
+
+        private List<Point> InterpolatePoints(List<Point> points, double step)
+        {
+            var interpolated = new List<Point>();
+            for (int i = 1; i < points.Count; i++)
+            {
+                var p1 = points[i - 1];
+                var p2 = points[i];
+                double distance = GetDistance(p1, p2);
+
+                if (distance > step * 0.5)
+                {
+                    int numSteps = (int)(distance / step);
+                    for (int j = 0; j <= numSteps; j++)
+                    {
+                        double t = j / (double)numSteps;
+                        double x = p1.X + t * (p2.X - p1.X);
+                        double y = p1.Y + t * (p2.Y - p1.Y);
+                        interpolated.Add(new Point(x, y));
+                    }
+                }
+                else
+                {
+                    interpolated.Add(p1);
+                }
+            }
+            return interpolated;
+        }
+
 
         private Rectangle _eraserCursor;
 
