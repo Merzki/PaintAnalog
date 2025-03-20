@@ -24,6 +24,7 @@ namespace PaintAnalog
 
         private double _currentThickness = 2.0;
         private string _currentShape = "Polyline";
+        private Ellipse _brushCursor;
 
         private double _zoomScale = 1.0;
         private const double ZoomFactor = 0.1;
@@ -38,6 +39,17 @@ namespace PaintAnalog
 
             Canvas.SetLeft(PaintCanvas, 0);
             Canvas.SetTop(PaintCanvas, 0);
+
+            _brushCursor = new Ellipse
+            {
+                Stroke = Brushes.Black,
+                StrokeThickness = 1,
+                Fill = Brushes.Transparent,
+                Width = _currentThickness,
+                Height = _currentThickness,
+                IsHitTestVisible = false
+            };
+            PaintCanvas.Children.Add(_brushCursor);
         }
 
         private void OnRendering(object sender, EventArgs e)
@@ -91,42 +103,90 @@ namespace PaintAnalog
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             var position = e.GetPosition(PaintCanvas);
-            if (!_isDrawing || e.LeftButton != MouseButtonState.Pressed) return;
 
-            if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
+            if (_currentTool == "Fill")
             {
-                _pointBuffer.Add(position);
-
-                if (_pointBuffer.Count >= 2) 
-                {
-                    var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep / 2.0); 
-                    foreach (var point in smoothPoints)
-                    {
-                        (eraserPolyline as Polyline)?.Points.Add(point);
-                    }
-                    _pointBuffer.Clear();
-                    _pointBuffer.Add(position);
-                }
-            }
-            else if (_currentTool == "Brush" && _currentShapeElement is Polyline brushPolyline)
-            {
-                _pointBuffer.Add(position);
-
-                if (_pointBuffer.Count >= 2)
-                {
-                    var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep);
-                    foreach (var point in smoothPoints)
-                    {
-                        brushPolyline.Points.Add(point);
-                    }
-                    _pointBuffer.Clear();
-                    _pointBuffer.Add(position);
-                }
+                _brushCursor.Visibility = Visibility.Hidden;
             }
             else
             {
-                UpdateShape(_currentShapeElement, _startPoint, position);
+                _brushCursor.Visibility = Visibility.Visible;
+                _brushCursor.Width = _currentThickness;
+                _brushCursor.Height = _currentThickness;
+                _brushCursor.StrokeThickness = 1;
+                _brushCursor.Stroke = _currentTool == "Eraser" ? Brushes.Black : (ViewModel?.SelectedColor as SolidColorBrush ?? Brushes.Black);
+                _brushCursor.Fill = _currentTool == "Eraser" ? Brushes.White : (ViewModel?.SelectedColor as SolidColorBrush ?? Brushes.Black);
+                Canvas.SetLeft(_brushCursor, position.X - _currentThickness / 2);
+                Canvas.SetTop(_brushCursor, position.Y - _currentThickness / 2);
             }
+
+            if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
+                {
+                    _pointBuffer.Add(position);
+                    if (_pointBuffer.Count >= 2)
+                    {
+                        var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep / 2.0);
+                        foreach (var point in smoothPoints)
+                        {
+                            eraserPolyline.Points.Add(point);
+
+                            var ellipse = new Ellipse
+                            {
+                                Width = _currentThickness,
+                                Height = _currentThickness,
+                                Fill = Brushes.White,
+                                StrokeThickness = 0
+                            };
+                            Canvas.SetLeft(ellipse, point.X - _currentThickness / 2);
+                            Canvas.SetTop(ellipse, point.Y - _currentThickness / 2);
+                            PaintCanvas.Children.Add(ellipse);
+                        }
+                        _pointBuffer.Clear();
+                        _pointBuffer.Add(position);
+                    }
+                }
+
+                else if (_currentTool == "Brush" && _currentShapeElement is Polyline brushPolyline)
+                {
+                    _pointBuffer.Add(position);
+                    if (_pointBuffer.Count >= 2)
+                    {
+                        var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep);
+                        foreach (var point in smoothPoints)
+                        {
+                            brushPolyline.Points.Add(point);
+
+                            var ellipse = new Ellipse
+                            {
+                                Width = _currentThickness,
+                                Height = _currentThickness,
+                                Fill = brushPolyline.Stroke,
+                                StrokeThickness = 0
+                            };
+                            Canvas.SetLeft(ellipse, point.X - _currentThickness / 2);
+                            Canvas.SetTop(ellipse, point.Y - _currentThickness / 2);
+                            PaintCanvas.Children.Add(ellipse);
+                        }
+                        _pointBuffer.Clear();
+                        _pointBuffer.Add(position);
+                    }
+                }
+
+                else
+                {
+                    UpdateShape(_currentShapeElement, _startPoint, position);
+                }
+            }
+        }
+
+        private void UpdateBrushCursor()
+        {
+            var brushColor = (ViewModel?.SelectedColor as SolidColorBrush)?.Color ?? Colors.Black;
+            _brushCursor.Width = _currentThickness;
+            _brushCursor.Height = _currentThickness;
+            _brushCursor.Stroke = new SolidColorBrush(brushColor);
         }
 
         private double GetDistance(Point p1, Point p2)
@@ -185,7 +245,6 @@ namespace PaintAnalog
             }
         }
 
-
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDrawing && e.LeftButton == MouseButtonState.Released)
@@ -237,6 +296,7 @@ namespace PaintAnalog
                 _currentTool = toolsWindow.SelectedTool;
                 UpdateToolSettingsButton();
             }
+            UpdateBrushCursor();
         }
 
         private string _currentTool = "Brush";
@@ -277,6 +337,7 @@ namespace PaintAnalog
                 _currentThickness = penSettingsWindow.SelectedThickness;
                 _currentShape = penSettingsWindow.SelectedShape;
             }
+            UpdateBrushCursor();
         }
 
         private void OpenEraserSettings(object sender, RoutedEventArgs e)
@@ -342,6 +403,7 @@ namespace PaintAnalog
 
             PaintCanvas.Children.Clear();
             PaintCanvas.Children.Add(image);
+            PaintCanvas.Children.Add(_brushCursor);
             ViewModel?.SaveState(PaintCanvas);
         }
 
@@ -468,7 +530,17 @@ namespace PaintAnalog
             }
             else if (shape is Polyline polyline)
             {
-                polyline.Points.Add(endPoint);
+                _pointBuffer.Add(endPoint);
+                if (_pointBuffer.Count >= 2)
+                {
+                    var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep);
+                    foreach (var point in smoothPoints)
+                    {
+                        polyline.Points.Add(point);
+                    }
+                    _pointBuffer.Clear();
+                    _pointBuffer.Add(endPoint);
+                }
             }
             else if (shape is Polygon polygon && _currentShape == "Triangle")
             {

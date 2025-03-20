@@ -67,6 +67,7 @@
                         <ScaleTransform x:Name="CanvasScaleTransform" />
                     </Canvas.LayoutTransform>
                 </Canvas>
+                <Canvas Name="CursorOverlayCanvas" IsHitTestVisible="False"/>
             </Grid>
         </ScrollViewer>
     </DockPanel>
