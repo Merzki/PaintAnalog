@@ -97,6 +97,38 @@ namespace PaintAnalog
 
                 CanvasScrollViewer.ScrollToHorizontalOffset(0);
                 CanvasScrollViewer.ScrollToVerticalOffset(0);
+
+                RemoveOutOfBoundsElements();
+            }
+        }
+
+        private void RemoveOutOfBoundsElements()
+        {
+            List<UIElement> elementsToRemove = new List<UIElement>();
+
+            foreach (UIElement element in PaintCanvas.Children)
+            {
+                if (element is Shape shape)
+                {
+                    double left = Canvas.GetLeft(shape);
+                    double top = Canvas.GetTop(shape);
+
+                    if (double.IsNaN(left)) left = 0;
+                    if (double.IsNaN(top)) top = 0;
+
+                    double right = left + shape.RenderSize.Width;
+                    double bottom = top + shape.RenderSize.Height;
+
+                    if (right > PaintCanvas.Width || bottom > PaintCanvas.Height)
+                    {
+                        elementsToRemove.Add(shape);
+                    }
+                }
+            }
+
+            foreach (var element in elementsToRemove)
+            {
+                PaintCanvas.Children.Remove(element);
             }
         }
 
@@ -266,7 +298,7 @@ namespace PaintAnalog
                 var p2 = points[i];
                 double distance = GetDistance(p1, p2);
 
-                if (distance > step * 0.5)
+                if (distance > step) 
                 {
                     int numSteps = (int)(distance / step);
                     for (int j = 0; j <= numSteps; j++)
