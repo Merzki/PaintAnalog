@@ -728,17 +728,17 @@ namespace PaintAnalog.ViewModels
                 }
 
                 var renderBitmap = new RenderTargetBitmap(
-                    (int)Math.Ceiling(bounds.Width),
-                    (int)Math.Ceiling(bounds.Height),
-                    96, 96, PixelFormats.Pbgra32);
+                (int)Math.Ceiling(canvas.ActualWidth),
+                (int)Math.Ceiling(canvas.ActualHeight),
+                96, 96, PixelFormats.Pbgra32);
 
                 var visual = new DrawingVisual();
                 using (var context = visual.RenderOpen())
                 {
-                    context.PushTransform(new TranslateTransform(-bounds.X, -bounds.Y));
-                    context.DrawRectangle(new VisualBrush(canvas), null, new Rect(new Point(), bounds.Size));
+                    context.DrawRectangle(new VisualBrush(canvas), null, new Rect(new Point(), new Size(canvas.ActualWidth, canvas.ActualHeight)));
                 }
                 renderBitmap.Render(visual);
+
 
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(renderBitmap));

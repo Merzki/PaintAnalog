@@ -47,9 +47,10 @@ namespace PaintAnalog
                 Fill = Brushes.Transparent,
                 Width = _currentThickness,
                 Height = _currentThickness,
-                IsHitTestVisible = false
+                IsHitTestVisible = false,
             };
             PaintCanvas.Children.Add(_brushCursor);
+            Panel.SetZIndex(_brushCursor, int.MaxValue);
         }
 
         private void OnRendering(object sender, EventArgs e)
