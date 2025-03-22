@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using PaintAnalog.ViewModels;
 using PaintAnalog.Views;
 
@@ -30,12 +31,15 @@ namespace PaintAnalog
         private const double ZoomFactor = 0.1;
 
         private MainViewModel ViewModel => DataContext as MainViewModel;
+        private DispatcherTimer _renderingTimer;
 
         public MainWindow()
         {
             InitializeComponent();
             UpdateToolSettingsButton();
-            CompositionTarget.Rendering += OnRendering;
+            _renderingTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) }; 
+            _renderingTimer.Tick += OnRendering;
+            _renderingTimer.Start();
 
             Canvas.SetLeft(PaintCanvas, 0);
             Canvas.SetTop(PaintCanvas, 0);
@@ -105,11 +109,9 @@ namespace PaintAnalog
 
         private void RemoveOutOfBoundsElements()
         {
-            List<UIElement> elementsToRemove = new List<UIElement>();
-
-            foreach (UIElement element in PaintCanvas.Children)
+            for (int i = PaintCanvas.Children.Count - 1; i >= 0; i--)
             {
-                if (element is Shape shape)
+                if (PaintCanvas.Children[i] is Shape shape)
                 {
                     double left = Canvas.GetLeft(shape);
                     double top = Canvas.GetTop(shape);
@@ -122,20 +124,68 @@ namespace PaintAnalog
 
                     if (right > PaintCanvas.Width || bottom > PaintCanvas.Height)
                     {
-                        elementsToRemove.Add(shape);
+                        PaintCanvas.Children.RemoveAt(i);
                     }
                 }
-            }
-
-            foreach (var element in elementsToRemove)
-            {
-                PaintCanvas.Children.Remove(element);
             }
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             var position = e.GetPosition(PaintCanvas);
+
+            UpdateBrushCursor(position);
+
+            if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
+                {
+                    HandleDrawing(eraserPolyline, position, Brushes.White, InterpolationStep / 2.0);
+                }
+                else if (_currentTool == "Brush" && _currentShapeElement is Polyline brushPolyline)
+                {
+                    HandleDrawing(brushPolyline, position, brushPolyline.Stroke, InterpolationStep);
+                }
+                else
+                {
+                    UpdateShape(_currentShapeElement, _startPoint, position);
+                }
+            }
+        }
+
+        private void HandleDrawing(Polyline polyline, Point position, Brush brush, double interpolationStep)
+        {
+            _pointBuffer.Add(position);
+            if (_pointBuffer.Count >= 2)
+            {
+                var smoothPoints = InterpolatePoints(_pointBuffer, interpolationStep);
+                foreach (var point in smoothPoints)
+                {
+                    polyline.Points.Add(point);
+
+                    if (_currentTool == "Eraser")
+                    {
+                        var ellipse = new Ellipse
+                        {
+                            Width = _currentThickness,
+                            Height = _currentThickness,
+                            Fill = brush,
+                            StrokeThickness = 0
+                        };
+                        Canvas.SetLeft(ellipse, point.X - _currentThickness / 2);
+                        Canvas.SetTop(ellipse, point.Y - _currentThickness / 2);
+                        PaintCanvas.Children.Add(ellipse);
+                    }
+                }
+                _pointBuffer.Clear();
+                _pointBuffer.Add(position);
+            }
+        }
+
+        private void UpdateBrushCursor(Point? position = null)
+        {
+            if (_brushCursor == null)
+                return;
 
             if (_currentTool == "Fill")
             {
@@ -144,82 +194,19 @@ namespace PaintAnalog
             else
             {
                 _brushCursor.Visibility = Visibility.Visible;
+
+                var brushColor = (ViewModel?.SelectedColor as SolidColorBrush)?.Color ?? Colors.Black;
                 _brushCursor.Width = _currentThickness;
                 _brushCursor.Height = _currentThickness;
-                _brushCursor.StrokeThickness = 1;
-                _brushCursor.Stroke = _currentTool == "Eraser" ? Brushes.Black : (ViewModel?.SelectedColor as SolidColorBrush ?? Brushes.Black);
-                _brushCursor.Fill = _currentTool == "Eraser" ? Brushes.White : (ViewModel?.SelectedColor as SolidColorBrush ?? Brushes.Black);
-                Canvas.SetLeft(_brushCursor, position.X - _currentThickness / 2);
-                Canvas.SetTop(_brushCursor, position.Y - _currentThickness / 2);
-            }
+                _brushCursor.Stroke = _currentTool == "Eraser" ? Brushes.Black : new SolidColorBrush(brushColor);
+                _brushCursor.Fill = _currentTool == "Eraser" ? Brushes.White : new SolidColorBrush(brushColor);
 
-            if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
+                if (position.HasValue)
                 {
-                    _pointBuffer.Add(position);
-                    if (_pointBuffer.Count >= 2)
-                    {
-                        var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep / 2.0);
-                        foreach (var point in smoothPoints)
-                        {
-                            eraserPolyline.Points.Add(point);
-
-                            var ellipse = new Ellipse
-                            {
-                                Width = _currentThickness,
-                                Height = _currentThickness,
-                                Fill = Brushes.White,
-                                StrokeThickness = 0
-                            };
-                            Canvas.SetLeft(ellipse, point.X - _currentThickness / 2);
-                            Canvas.SetTop(ellipse, point.Y - _currentThickness / 2);
-                            PaintCanvas.Children.Add(ellipse);
-                        }
-                        _pointBuffer.Clear();
-                        _pointBuffer.Add(position);
-                    }
-                }
-
-                else if (_currentTool == "Brush" && _currentShapeElement is Polyline brushPolyline)
-                {
-                    _pointBuffer.Add(position);
-                    if (_pointBuffer.Count >= 2)
-                    {
-                        var smoothPoints = InterpolatePoints(_pointBuffer, InterpolationStep);
-                        foreach (var point in smoothPoints)
-                        {
-                            brushPolyline.Points.Add(point);
-
-                            var ellipse = new Ellipse
-                            {
-                                Width = _currentThickness,
-                                Height = _currentThickness,
-                                Fill = brushPolyline.Stroke,
-                                StrokeThickness = 0
-                            };
-                            Canvas.SetLeft(ellipse, point.X - _currentThickness / 2);
-                            Canvas.SetTop(ellipse, point.Y - _currentThickness / 2);
-                            PaintCanvas.Children.Add(ellipse);
-                        }
-                        _pointBuffer.Clear();
-                        _pointBuffer.Add(position);
-                    }
-                }
-
-                else
-                {
-                    UpdateShape(_currentShapeElement, _startPoint, position);
+                    Canvas.SetLeft(_brushCursor, position.Value.X - _currentThickness / 2);
+                    Canvas.SetTop(_brushCursor, position.Value.Y - _currentThickness / 2);
                 }
             }
-        }
-
-        private void UpdateBrushCursor()
-        {
-            var brushColor = (ViewModel?.SelectedColor as SolidColorBrush)?.Color ?? Colors.Black;
-            _brushCursor.Width = _currentThickness;
-            _brushCursor.Height = _currentThickness;
-            _brushCursor.Stroke = new SolidColorBrush(brushColor);
         }
 
         private double GetDistance(Point p1, Point p2)

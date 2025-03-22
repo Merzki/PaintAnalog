@@ -8,23 +8,34 @@
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
+    <Window.Resources>
+        <Style x:Key="ToolBarButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="10,5"/>
+        </Style>
+        <Style x:Key="ToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
     <DockPanel>
         <DockPanel.InputBindings>
             <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
         </DockPanel.InputBindings>
         <ToolBar DockPanel.Dock="Top">
-            <Button Content="Tools" Click="OpenToolsWindow" />
-            <Button Content="Clear" Command="{Binding ClearCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button Content="Save" Command="{Binding SaveCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button Content="Choose color" Command="{Binding ChooseColorCommand}" />
-            <Button Content="Enter text" Command="{Binding InsertTextCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button Content="Insert Image" Command="{Binding InsertImageCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button Content="Confirm Changes" Command="{Binding ConfirmChangesCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
-            <Button x:Name="SettingsButton" Content="Brush Settings" Click="OpenPenSettings" />
-            <Button Content="Resize Canvas" Click="ResizeCanvas" />
+            <Button Content="Tools" Click="OpenToolsWindow" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Clear" Command="{Binding ClearCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Save" Command="{Binding SaveCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Choose color" Command="{Binding ChooseColorCommand}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Enter text" Command="{Binding InsertTextCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Insert Image" Command="{Binding InsertImageCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Confirm Changes" Command="{Binding ConfirmChangesCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button x:Name="SettingsButton" Content="Brush Settings" Click="OpenPenSettings" Style="{StaticResource ToolBarButtonStyle}" />
+            <Button Content="Resize Canvas" Click="ResizeCanvas" Style="{StaticResource ToolBarButtonStyle}" />
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Text Size:" Margin="5,0,5,0" VerticalAlignment="Center"/>
                 <Slider Minimum="8" Maximum="96" Value="{Binding TextSize, UpdateSourceTrigger=PropertyChanged}" Width="150" />
@@ -41,13 +52,13 @@
                 </ComboBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
-                <ToggleButton Width="40" Height="30" IsChecked="{Binding IsBold}" ToolTip="Bold (Ctrl+B)">
+                <ToggleButton Style="{StaticResource ToggleButtonStyle}" IsChecked="{Binding IsBold}" ToolTip="Bold (Ctrl+B)">
                     <TextBlock Text="B" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </ToggleButton>
-                <ToggleButton Width="40" Height="30" IsChecked="{Binding IsItalic}" ToolTip="Italic (Ctrl+I)">
+                <ToggleButton Style="{StaticResource ToggleButtonStyle}" IsChecked="{Binding IsItalic}" ToolTip="Italic (Ctrl+I)">
                     <TextBlock Text="I" FontStyle="Italic" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </ToggleButton>
-                <ToggleButton Width="40" Height="30" IsChecked="{Binding IsUnderline}" ToolTip="Underline (Ctrl+U)">
+                <ToggleButton Style="{StaticResource ToggleButtonStyle}" IsChecked="{Binding IsUnderline}" ToolTip="Underline (Ctrl+U)">
                     <TextBlock Text="U" TextDecorations="Underline" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </ToggleButton>
             </StackPanel>
