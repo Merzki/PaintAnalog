@@ -328,6 +328,8 @@ namespace PaintAnalog.ViewModels
 
             if (openFileDialog.ShowDialog() == true)
             {
+                SaveState(canvas);
+
                 var bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
 
                 var image = new Image
@@ -355,7 +357,6 @@ namespace PaintAnalog.ViewModels
                 }
 
                 SaveState(canvas);
-
                 ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
             }
         }
