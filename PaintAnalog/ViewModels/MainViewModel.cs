@@ -24,11 +24,44 @@ namespace PaintAnalog.ViewModels
         private readonly Stack<UIElement[]> _redoElements = new();
         private double _textSize = 12;
         private FontFamily _selectedFontFamily = new FontFamily("Segoe UI");
+        private UIElementCollection _canvasChildren;
+        private double _canvasWidth;
+        private double _canvasHeight;
 
         public string Title
         {
             get => _title;
             set => SetProperty(ref _title, value);
+        }
+
+        public UIElementCollection CanvasChildren
+        {
+            get => _canvasChildren;
+            set
+            {
+                _canvasChildren = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double CanvasWidth
+        {
+            get => _canvasWidth;
+            set
+            {
+                _canvasWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double CanvasHeight
+        {
+            get => _canvasHeight;
+            set
+            {
+                _canvasHeight = value;
+                OnPropertyChanged();
+            }
         }
 
         public SolidColorBrush SelectedColor
@@ -107,6 +140,7 @@ namespace PaintAnalog.ViewModels
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
         public ICommand SaveCanvasCommand { get; }
+        public ICommand OpenImageCommand { get; }
         public ICommand UndoCommand { get; }
         public ICommand RedoCommand { get; }
         public ICommand InsertImageCommand { get; }
@@ -117,6 +151,7 @@ namespace PaintAnalog.ViewModels
             ClearCanvasCommand = new RelayCommand(ClearCanvas);
             ChooseColorCommand = new RelayCommand(ChooseColor);
             SaveCanvasCommand = new RelayCommand(SaveCanvas);
+            OpenImageCommand = new RelayCommand(OpenImage);
             UndoCommand = new RelayCommand(Undo, CanUndo);
             RedoCommand = new RelayCommand(Redo, CanRedo);
             InsertImageCommand = new RelayCommand(InsertImage);
@@ -689,6 +724,9 @@ namespace PaintAnalog.ViewModels
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
+        public double ImageDpiX { get; set; } = 96;
+        public double ImageDpiY { get; set; } = 96;
+
         private void SaveCanvas(object parameter)
         {
             var canvas = parameter as Canvas;
@@ -728,9 +766,9 @@ namespace PaintAnalog.ViewModels
                 }
 
                 var renderBitmap = new RenderTargetBitmap(
-                (int)Math.Ceiling(canvas.ActualWidth),
-                (int)Math.Ceiling(canvas.ActualHeight),
-                96, 96, PixelFormats.Pbgra32);
+                    (int)Math.Ceiling(canvas.ActualWidth),
+                    (int)Math.Ceiling(canvas.ActualHeight),
+                    ImageDpiX, ImageDpiY, PixelFormats.Pbgra32);
 
                 var visual = new DrawingVisual();
                 using (var context = visual.RenderOpen())
@@ -738,7 +776,6 @@ namespace PaintAnalog.ViewModels
                     context.DrawRectangle(new VisualBrush(canvas), null, new Rect(new Point(), new Size(canvas.ActualWidth, canvas.ActualHeight)));
                 }
                 renderBitmap.Render(visual);
-
 
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
@@ -749,5 +786,55 @@ namespace PaintAnalog.ViewModels
                 }
             }
         }
+
+        private void OpenImage(object parameter)
+        {
+            if (parameter is Canvas paintCanvas)
+            {
+                var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "Image files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    SaveState(paintCanvas);
+
+                    var bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
+
+                    ImageDpiX = bitmap.DpiX;
+                    ImageDpiY = bitmap.DpiY;
+
+                    var brushCursor = paintCanvas.Children.OfType<Ellipse>().FirstOrDefault(e => e.Name == "BrushCursor");
+                    var elementsToKeep = brushCursor != null ? new List<UIElement> { brushCursor } : new List<UIElement>();
+
+                    paintCanvas.Children.Clear();
+                    foreach (var element in elementsToKeep)
+                    {
+                        paintCanvas.Children.Add(element);
+                    }
+
+                    paintCanvas.Width = bitmap.PixelWidth;
+                    paintCanvas.Height = bitmap.PixelHeight;
+                    CanvasWidth = bitmap.PixelWidth;
+                    CanvasHeight = bitmap.PixelHeight;
+
+                    var image = new Image
+                    {
+                        Source = bitmap,
+                        Stretch = Stretch.None,
+                        Width = bitmap.PixelWidth,
+                        Height = bitmap.PixelHeight
+                    };
+
+                    Canvas.SetLeft(image, 0);
+                    Canvas.SetTop(image, 0);
+                    paintCanvas.Children.Add(image);
+
+                    SaveState(paintCanvas);
+                }
+            }
+        }
+
     }
 }

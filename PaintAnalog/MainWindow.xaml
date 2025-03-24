@@ -25,9 +25,21 @@
             <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
         </DockPanel.InputBindings>
         <ToolBar DockPanel.Dock="Top">
+            <Button x:Name="FileButton" Content="File" Style="{StaticResource ToolBarButtonStyle}" Tag="{Binding ElementName=PaintCanvas}" Click="FileButton_Click">
+                <Button.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                        <MenuItem Header="Save" 
+                      Command="{Binding SaveCanvasCommand}" 
+                      CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+
+                        <MenuItem Header="Open" 
+                      Command="{Binding OpenImageCommand}" 
+                      CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
             <Button Content="Tools" Click="OpenToolsWindow" Style="{StaticResource ToolBarButtonStyle}" />
             <Button Content="Clear" Command="{Binding ClearCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
-            <Button Content="Save" Command="{Binding SaveCanvasCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
             <Button Content="Choose color" Command="{Binding ChooseColorCommand}" Style="{StaticResource ToolBarButtonStyle}" />
             <Button Content="Enter text" Command="{Binding InsertTextCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />
             <Button Content="Insert Image" Command="{Binding InsertImageCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" Style="{StaticResource ToolBarButtonStyle}" />

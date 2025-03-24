@@ -46,6 +46,7 @@ namespace PaintAnalog
 
             _brushCursor = new Ellipse
             {
+                Name = "BrushCursor",
                 Stroke = Brushes.Black,
                 StrokeThickness = 1,
                 Fill = Brushes.Transparent,
@@ -53,8 +54,11 @@ namespace PaintAnalog
                 Height = _currentThickness,
                 IsHitTestVisible = false,
             };
-            PaintCanvas.Children.Add(_brushCursor);
-            Panel.SetZIndex(_brushCursor, int.MaxValue);
+            if (!PaintCanvas.Children.Contains(_brushCursor))
+            {
+                PaintCanvas.Children.Add(_brushCursor);
+                Panel.SetZIndex(_brushCursor, int.MaxValue);
+            }
         }
 
         private void OnRendering(object sender, EventArgs e)
@@ -363,6 +367,16 @@ namespace PaintAnalog
             if (eraserSettingsWindow.ShowDialog() == true)
             {
                 _currentThickness = eraserSettingsWindow.SelectedThickness;
+            }
+        }
+
+        private void FileButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
+                button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                button.ContextMenu.IsOpen = true;
             }
         }
 
