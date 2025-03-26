@@ -194,8 +194,7 @@ namespace PaintAnalog.ViewModels
 
         private void InsertRichText(object parameter)
         {
-            var canvas = parameter as Canvas;
-            if (canvas == null) return;
+            if (parameter is not Canvas canvas) return;
 
             var richTextBox = new WpfRichTextBox
             {
@@ -211,7 +210,8 @@ namespace PaintAnalog.ViewModels
                 MinHeight = 50,
                 Padding = new Thickness(2),
                 VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                Document = new FlowDocument(new Paragraph())
             };
 
             var border = new Border
@@ -235,35 +235,64 @@ namespace PaintAnalog.ViewModels
             richTextBox.PreviewTextInput += (s, e) =>
             {
                 var rtb = s as WpfRichTextBox;
-                if (rtb == null) return;
+                if (rtb == null || string.IsNullOrEmpty(e.Text)) return;
 
-                var caretPos = rtb.CaretPosition;
-                if (caretPos.Paragraph == null)
+                var caretPosition = rtb.CaretPosition;
+
+                if (!rtb.Selection.IsEmpty)
                 {
-                    caretPos = rtb.Document.Blocks.FirstBlock.ContentEnd;
+                    rtb.Selection.Text = e.Text;
+                    ApplyCurrentStyleToSelection(rtb);
+                }
+                else
+                {
+                    var textRange = new TextRange(caretPosition, caretPosition) { Text = e.Text };
+                    ApplyCurrentStyleToTextRange(textRange);
+
+                    rtb.CaretPosition = textRange.End;
                 }
 
-                var run = new Run(e.Text)
-                {
-                    Foreground = SelectedColor,
-                    FontSize = TextSize,
-                    FontFamily = SelectedFontFamily,
-                    FontWeight = IsBold ? FontWeights.Bold : FontWeights.Normal,
-                    FontStyle = IsItalic ? FontStyles.Italic : FontStyles.Normal,
-                    TextDecorations = IsUnderline ? TextDecorations.Underline : null
-                };
-
-                caretPos.InsertTextInRun(""); 
-                caretPos.Paragraph.Inlines.Add(run);
-                rtb.CaretPosition = run.ContentEnd;
                 e.Handled = true;
+                rtb.Dispatcher.InvokeAsync(() => AutoResizeRichTextBox(rtb, border),
+                    System.Windows.Threading.DispatcherPriority.Background);
+            };
 
-                AutoResizeRichTextBox(rtb, border);
+            richTextBox.PreviewKeyDown += (s, e) =>
+            {
+                var rtb = s as WpfRichTextBox;
+                if (rtb == null) return;
+
+                if (e.Key == Key.Back || e.Key == Key.Delete)
+                {
+                    if (!rtb.Selection.IsEmpty)
+                    {
+                        rtb.Selection.Text = "";
+                        e.Handled = true;
+                    }
+                }
             };
 
             richTextBox.TextChanged += (s, e) =>
             {
-                AutoResizeRichTextBox(richTextBox, border);
+                var rtb = s as WpfRichTextBox;
+                if (rtb == null) return;
+
+                rtb.Dispatcher.InvokeAsync(() => AutoResizeRichTextBox(rtb, border),
+                    System.Windows.Threading.DispatcherPriority.Background);
+            };
+
+            this.PropertyChanged += (sender, e) =>
+            {
+                if (richTextBox.IsKeyboardFocusWithin &&
+                    (e.PropertyName == nameof(SelectedColor) ||
+                     e.PropertyName == nameof(TextSize) ||
+                     e.PropertyName == nameof(SelectedFontFamily) ||
+                     e.PropertyName == nameof(IsBold) ||
+                     e.PropertyName == nameof(IsItalic) ||
+                     e.PropertyName == nameof(IsUnderline)))
+                {
+                    ApplyCurrentStyleToSelection(richTextBox);
+                }
             };
 
             richTextBox.Focus();
@@ -273,6 +302,27 @@ namespace PaintAnalog.ViewModels
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
+        private void ApplyCurrentStyleToSelection(WpfRichTextBox rtb)
+        {
+            if (rtb == null || rtb.Selection.IsEmpty) return;
+
+            var textRange = new TextRange(rtb.Selection.Start, rtb.Selection.End);
+            ApplyCurrentStyleToTextRange(textRange);
+        }
+
+        private void ApplyCurrentStyleToTextRange(TextRange textRange)
+        {
+            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, SelectedColor);
+            textRange.ApplyPropertyValue(TextElement.FontSizeProperty, TextSize);
+            textRange.ApplyPropertyValue(TextElement.FontFamilyProperty, SelectedFontFamily);
+            textRange.ApplyPropertyValue(TextElement.FontWeightProperty,
+                IsBold ? FontWeights.Bold : FontWeights.Normal);
+            textRange.ApplyPropertyValue(TextElement.FontStyleProperty,
+                IsItalic ? FontStyles.Italic : FontStyles.Normal);
+            textRange.ApplyPropertyValue(Inline.TextDecorationsProperty,
+                IsUnderline ? TextDecorations.Underline : null);
+        }
+
         private void AutoResizeRichTextBox(WpfRichTextBox rtb, Border border)
         {
             rtb.Width = double.NaN;
@@ -280,39 +330,25 @@ namespace PaintAnalog.ViewModels
             rtb.Document.PageWidth = 10000;
             rtb.UpdateLayout();
 
-            rtb.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+            double maxWidth = 0, maxHeight = 0;
 
-            double maxWidth = 0;
-            double maxHeight = 0;
-
-            var pointer = rtb.Document.ContentStart;
-
-            while (pointer != null && pointer.CompareTo(rtb.Document.ContentEnd) < 0)
+            for (var pointer = rtb.Document.ContentStart;
+                 pointer != null && pointer.CompareTo(rtb.Document.ContentEnd) < 0;
+                 pointer = pointer.GetNextContextPosition(LogicalDirection.Forward))
             {
-                var next = pointer.GetNextContextPosition(LogicalDirection.Forward);
-                if (next == null) break;
-
                 try
                 {
                     var rect = pointer.GetCharacterRect(LogicalDirection.Forward);
-                    if (rect.Right > maxWidth) maxWidth = rect.Right;
-                    if (rect.Bottom > maxHeight) maxHeight = rect.Bottom;
+                    maxWidth = Math.Max(maxWidth, rect.Right);
+                    maxHeight = Math.Max(maxHeight, rect.Bottom);
                 }
-                catch
-                {
-
-                }
-
-                pointer = next;
+                catch { }
             }
 
-            double newWidth = Math.Max(rtb.MinWidth, maxWidth + 20);
-            double newHeight = Math.Max(rtb.MinHeight, maxHeight + 10);
-
-            border.Width = newWidth;
-            border.Height = newHeight;
-            rtb.Width = newWidth;
-            rtb.Height = newHeight;
+            border.Width = Math.Max(rtb.MinWidth, maxWidth + 20);
+            border.Height = Math.Max(rtb.MinHeight, maxHeight + 10);
+            rtb.Width = border.Width;
+            rtb.Height = border.Height;
         }
 
         public void InsertImage(object parameter)
