@@ -231,6 +231,7 @@ namespace PaintAnalog
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
+
                 if (_currentTool == "Eraser")
                 {
                     _isDrawing = true;
@@ -263,6 +264,11 @@ namespace PaintAnalog
                     _currentShapeElement.StrokeThickness = _currentThickness;
 
                     PaintCanvas.Children.Add(_currentShapeElement);
+
+                    if (_currentShape == "Polyline")
+                    {
+                        AddEndPointDot(position, ViewModel?.SelectedColor ?? Brushes.Black, _currentThickness);
+                    }
                 }
             }
         }
@@ -272,11 +278,35 @@ namespace PaintAnalog
             if (_isDrawing && e.LeftButton == MouseButtonState.Released)
             {
                 _isDrawing = false;
+
+                if (_currentShapeElement is Polyline polyline && polyline.Points.Count > 0)
+                {
+                    Point endPoint = polyline.Points.Last();
+                    AddEndPointDot(endPoint, polyline.Stroke, polyline.StrokeThickness);
+                }
+
                 _currentShapeElement = null;
                 _pointBuffer.Clear();
 
                 ViewModel?.SaveState(PaintCanvas);
             }
+        }
+
+        private void AddEndPointDot(Point position, Brush color, double thickness)
+        {
+            var dot = new Ellipse
+            {
+                Width = thickness,
+                Height = thickness,
+                Fill = color,
+                Stroke = color,
+                StrokeThickness = 1
+            };
+
+            Canvas.SetLeft(dot, position.X - thickness / 2);
+            Canvas.SetTop(dot, position.Y - thickness / 2);
+
+            PaintCanvas.Children.Add(dot);
         }
 
         private List<Point> InterpolatePoints(List<Point> points, double step)

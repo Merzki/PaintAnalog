@@ -351,6 +351,10 @@ namespace PaintAnalog.ViewModels
             rtb.Height = border.Height;
         }
 
+        private bool _isDragging;
+        private Image _draggedImage;
+        private Point _startPoint;
+
         public void InsertImage(object parameter)
         {
             var canvas = parameter as Canvas;
@@ -373,33 +377,47 @@ namespace PaintAnalog.ViewModels
                     Source = bitmap,
                     Width = bitmap.Width,
                     Height = bitmap.Height,
-                    IsEnabled = true
+                    IsEnabled = true,
+                    Stretch = Stretch.Fill
                 };
 
                 Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
                 Canvas.SetTop(image, (canvas.ActualHeight - bitmap.Height) / 2);
 
+                image.MouseWheel += Image_MouseWheel;
+
                 image.MouseLeftButtonDown += Image_MouseLeftButtonDown;
                 image.MouseMove += Image_MouseMove;
                 image.MouseLeftButtonUp += Image_MouseLeftButtonUp;
 
+                var selectionBox = new SelectionBox(image);
                 canvas.Children.Add(image);
-
-                var adornerLayer = AdornerLayer.GetAdornerLayer(image);
-                if (adornerLayer != null)
-                {
-                    var resizeAdorner = new ResizeAdorner(image);
-                    adornerLayer.Add(resizeAdorner);
-                }
+                canvas.Children.Add(selectionBox);
+                SetIsEditable(image, true);
 
                 SaveState(canvas);
                 ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
             }
         }
 
-        private Point _startPoint;
-        private bool _isDragging;
-        private Image _draggedImage;
+        private void Image_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is Image image)
+            {
+                var transform = image.RenderTransform as RotateTransform;
+                if (transform == null)
+                {
+                    transform = new RotateTransform(0);
+                    image.RenderTransform = transform;
+                    image.RenderTransformOrigin = new Point(0.5, 0.5);
+                }
+
+                double angle = transform.Angle + (e.Delta > 0 ? 10 : -10); 
+                transform.Angle = angle;
+
+                e.Handled = true;
+            }
+        }
 
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -408,9 +426,7 @@ namespace PaintAnalog.ViewModels
                 _isDragging = true;
                 _draggedImage = image;
                 _startPoint = e.GetPosition(image);
-
                 IsEditingImage = true;
-
                 image.CaptureMouse();
             }
         }
@@ -423,9 +439,17 @@ namespace PaintAnalog.ViewModels
                 if (canvas != null)
                 {
                     var currentPoint = e.GetPosition(canvas);
-
                     Canvas.SetLeft(_draggedImage, currentPoint.X - _startPoint.X);
                     Canvas.SetTop(_draggedImage, currentPoint.Y - _startPoint.Y);
+
+                    foreach (var child in canvas.Children)
+                    {
+                        if (child is SelectionBox selectionBox && selectionBox.TargetElement == _draggedImage)
+                        {
+                            selectionBox.UpdatePosition();
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -435,21 +459,9 @@ namespace PaintAnalog.ViewModels
             if (_isDragging)
             {
                 _isDragging = false;
-
-                if (_draggedImage != null)
-                {
-                    _draggedImage.ReleaseMouseCapture();
-                    _draggedImage = null;
-
-                    IsEditingImage = false;
-
-                    var adornerLayer = AdornerLayer.GetAdornerLayer(sender as UIElement);
-                    if (adornerLayer != null)
-                    {
-                        var resizeAdorner = new ResizeAdorner(sender as UIElement);
-                        adornerLayer.Add(resizeAdorner);
-                    }
-                }
+                _draggedImage?.ReleaseMouseCapture();
+                _draggedImage = null;
+                IsEditingImage = false;
             }
         }
 
@@ -458,24 +470,21 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null) return false;
 
+            bool hasEditableImage = false;
+
             foreach (var element in canvas.Children)
             {
                 if (element is Border border && border.Child is System.Windows.Controls.RichTextBox richTextBox && !richTextBox.IsReadOnly)
                     return true;
 
-                if (element is Image image)
-                {
-                    var adornerLayer = AdornerLayer.GetAdornerLayer(image);
-                    if (adornerLayer != null)
-                    {
-                        var adorners = adornerLayer.GetAdorners(image);
-                        if (adorners != null && adorners.Length > 0)
-                            return true;
-                    }
-                }
+                if (element is Image image && image.IsHitTestVisible)
+                    hasEditableImage = true; 
+
+                if (element is SelectionBox)
+                    return true; 
             }
 
-            return false;
+            return hasEditableImage; 
         }
 
         private void ConfirmChanges(object parameter)
@@ -485,6 +494,8 @@ namespace PaintAnalog.ViewModels
 
             var focusedElement = Keyboard.FocusedElement as TextBox;
             focusedElement?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+
+            List<UIElement> toRemove = new List<UIElement>();
 
             foreach (var element in canvas.Children)
             {
@@ -508,29 +519,31 @@ namespace PaintAnalog.ViewModels
 
                 if (element is Image image)
                 {
-                    var adornerLayer = AdornerLayer.GetAdornerLayer(image);
-                    if (adornerLayer != null)
-                    {
-                        var adorners = adornerLayer.GetAdorners(image);
-                        if (adorners != null)
-                        {
-                            foreach (var adorner in adorners)
-                            {
-                                adornerLayer.Remove(adorner);
-                            }
-                        }
-                    }
+                    SelectionBox selectionBox = canvas.Children
+                        .OfType<SelectionBox>()
+                        .FirstOrDefault(sb => sb.TargetElement == image);
+
+                    if (selectionBox != null)
+                        toRemove.Add(selectionBox);
 
                     image.MouseLeftButtonDown -= Image_MouseLeftButtonDown;
                     image.MouseMove -= Image_MouseMove;
                     image.MouseLeftButtonUp -= Image_MouseLeftButtonUp;
+                    image.MouseWheel -= Image_MouseWheel;
+
+                    image.IsHitTestVisible = false; 
                 }
+            }
+
+            foreach (var element in toRemove)
+            {
+                canvas.Children.Remove(element);
             }
 
             IsEditingText = false;
             IsEditingImage = false;
 
-            SaveState(canvas);
+            SaveState(canvas); 
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
@@ -663,6 +676,21 @@ namespace PaintAnalog.ViewModels
             bottomRightHandle.MouseUp += (s, e) => _isResizing = false;
         }
 
+        private void RestoreImageHandlers(Canvas canvas)
+        {
+            foreach (var element in canvas.Children.OfType<Image>())
+            {
+                if (GetIsEditable(element))  
+                {
+                    element.MouseWheel += Image_MouseWheel;
+                    element.MouseLeftButtonDown += Image_MouseLeftButtonDown;
+                    element.MouseMove += Image_MouseMove;
+                    element.MouseLeftButtonUp += Image_MouseLeftButtonUp;
+                    element.IsHitTestVisible = true;
+                }
+            }
+        }
+
         private void UpdateHandlePositions(Image image, Rectangle topLeftHandle, Rectangle bottomRightHandle)
         {
             Canvas.SetLeft(topLeftHandle, Canvas.GetLeft(image) - topLeftHandle.Width / 2);
@@ -711,6 +739,8 @@ namespace PaintAnalog.ViewModels
             var previousElements = _undoElements.Peek();
             RestoreCanvas(canvas, previousElements);
 
+            RestoreImageHandlers(canvas);
+
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
@@ -755,7 +785,16 @@ namespace PaintAnalog.ViewModels
             if (canvas != null)
             {
                 SaveState(canvas);
-                canvas.Children.Clear();
+
+                var brushCursor = canvas.Children.OfType<Ellipse>().FirstOrDefault(e => e.Name == "BrushCursor");
+
+                canvas.Children.Clear(); 
+
+                if (brushCursor != null)
+                {
+                    canvas.Children.Add(brushCursor);
+                    Panel.SetZIndex(brushCursor, int.MaxValue);
+                }
             }
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
@@ -824,6 +863,19 @@ namespace PaintAnalog.ViewModels
             }
         }
 
+        public static readonly DependencyProperty IsEditableProperty =
+           DependencyProperty.RegisterAttached("IsEditable", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
+
+        public static void SetIsEditable(UIElement element, bool value)
+        {
+            element.SetValue(IsEditableProperty, value);
+        }
+
+        public static bool GetIsEditable(UIElement element)
+        {
+            return (bool)element.GetValue(IsEditableProperty);
+        }
+
         private void OpenImage(object parameter)
         {
             if (parameter is Canvas paintCanvas)
@@ -867,11 +919,11 @@ namespace PaintAnalog.ViewModels
                     Canvas.SetLeft(image, 0);
                     Canvas.SetTop(image, 0);
                     paintCanvas.Children.Add(image);
+                    SetIsEditable(image, false);
 
                     SaveState(paintCanvas);
                 }
             }
         }
-
     }
 }
