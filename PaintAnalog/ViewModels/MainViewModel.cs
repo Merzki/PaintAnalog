@@ -145,6 +145,7 @@ namespace PaintAnalog.ViewModels
         public ICommand RedoCommand { get; }
         public ICommand InsertImageCommand { get; }
         public ICommand ConfirmChangesCommand { get; }
+        public ICommand PasteImageCommand { get; }
 
         public MainViewModel()
         {
@@ -163,6 +164,7 @@ namespace PaintAnalog.ViewModels
             });
             ConfirmChangesCommand = new RelayCommand(ConfirmChanges, CanConfirmChanges);
             InsertTextCommand = new RelayCommand(InsertRichText);
+            PasteImageCommand = new RelayCommand(PasteImage);
         }
 
         private void ChooseColor(object parameter)
@@ -386,6 +388,42 @@ namespace PaintAnalog.ViewModels
 
                 image.MouseWheel += Image_MouseWheel;
 
+                image.MouseLeftButtonDown += Image_MouseLeftButtonDown;
+                image.MouseMove += Image_MouseMove;
+                image.MouseLeftButtonUp += Image_MouseLeftButtonUp;
+
+                var selectionBox = new SelectionBox(image);
+                canvas.Children.Add(image);
+                canvas.Children.Add(selectionBox);
+                SetIsEditable(image, true);
+
+                SaveState(canvas);
+                ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
+            }
+        }
+
+        private void PasteImage(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null) return;
+
+            if (Clipboard.ContainsImage())
+            {
+                SaveState(canvas);
+
+                var bitmap = Clipboard.GetImage();
+                var image = new Image
+                {
+                    Source = bitmap,
+                    Width = bitmap.Width,
+                    Height = bitmap.Height,
+                    Stretch = Stretch.Fill
+                };
+
+                Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
+                Canvas.SetTop(image, (canvas.ActualHeight - bitmap.Height) / 2);
+
+                image.MouseWheel += Image_MouseWheel;
                 image.MouseLeftButtonDown += Image_MouseLeftButtonDown;
                 image.MouseMove += Image_MouseMove;
                 image.MouseLeftButtonUp += Image_MouseLeftButtonUp;
