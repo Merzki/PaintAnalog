@@ -134,6 +134,17 @@ namespace PaintAnalog.ViewModels
             }
         }
 
+        private bool _isSelecting;
+        private Rectangle? _selectionRect;
+        private Point _selectionStart;
+
+        public bool IsSelecting
+        {
+            get => _isSelecting;
+            set => SetProperty(ref _isSelecting, value);
+        }
+
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ICommand InsertTextCommand { get; }
@@ -146,6 +157,7 @@ namespace PaintAnalog.ViewModels
         public ICommand InsertImageCommand { get; }
         public ICommand ConfirmChangesCommand { get; }
         public ICommand PasteImageCommand { get; }
+        public ICommand CopyLastImageCommand { get; }
 
         public MainViewModel()
         {
@@ -165,6 +177,7 @@ namespace PaintAnalog.ViewModels
             ConfirmChangesCommand = new RelayCommand(ConfirmChanges, CanConfirmChanges);
             InsertTextCommand = new RelayCommand(InsertRichText);
             PasteImageCommand = new RelayCommand(PasteImage);
+            CopyLastImageCommand = new RelayCommand(CopyLastImage);
         }
 
         private void ChooseColor(object parameter)
@@ -192,6 +205,144 @@ namespace PaintAnalog.ViewModels
                 }
                 popup.IsOpen = false;
             };
+        }
+
+        public void CopyLastImage(object parameter)
+        {
+            var canvas = parameter as Canvas;
+            if (canvas == null) return;
+
+            var lastImage = canvas.Children
+                .OfType<Image>()
+                .LastOrDefault();
+
+            if (lastImage == null) return;
+
+            var source = lastImage.Source as BitmapSource;
+
+            if (source == null) return;
+
+            Clipboard.SetImage(source);
+        }
+
+        private Image? _currentSelectionImage;
+        private SelectionBox? _currentSelectionBox;
+        private UIElement? _currentEditableElement;
+        private Rectangle? _currentSelectionWhiteRect;
+
+        public void StartSelection(Point startPoint, Canvas canvas)
+        {
+
+            SaveState(canvas);
+
+            _selectionStart = startPoint;
+            _selectionRect = new Rectangle
+            {
+                Stroke = Brushes.Black,
+                StrokeDashArray = new DoubleCollection { 4, 2 },
+                StrokeThickness = 1,
+                Fill = Brushes.Transparent
+            };
+
+            Canvas.SetLeft(_selectionRect, startPoint.X);
+            Canvas.SetTop(_selectionRect, startPoint.Y);
+            canvas.Children.Add(_selectionRect);
+
+            _isSelecting = true;
+        }
+
+        public void UpdateSelection(Point currentPoint, Canvas canvas)
+        {
+            if (!_isSelecting || _selectionRect == null) return; 
+
+            double width = currentPoint.X - _selectionStart.X;
+            double height = currentPoint.Y - _selectionStart.Y;
+
+            _selectionRect.Width = Math.Abs(width);
+            _selectionRect.Height = Math.Abs(height);
+            Canvas.SetLeft(_selectionRect, width > 0 ? _selectionStart.X : currentPoint.X);
+            Canvas.SetTop(_selectionRect, height > 0 ? _selectionStart.Y : currentPoint.Y);
+        }
+        public void EndSelection(Canvas canvas)
+        {
+            if (!_isSelecting || _selectionRect == null) return;
+
+            var bounds = new Rect(
+                Canvas.GetLeft(_selectionRect),
+                Canvas.GetTop(_selectionRect),
+                _selectionRect.Width,
+                _selectionRect.Height
+            );
+
+            canvas.Children.Remove(_selectionRect);
+            _selectionRect = null;
+            _isSelecting = false;
+
+            var rtb = new RenderTargetBitmap(
+                (int)Math.Ceiling(bounds.Width),
+                (int)Math.Ceiling(bounds.Height),
+                96, 96, PixelFormats.Pbgra32);
+
+            var dv = new DrawingVisual();
+            using (var dc = dv.RenderOpen())
+            {
+                var brush = new VisualBrush(canvas)
+                {
+                    Viewbox = bounds,
+                    ViewboxUnits = BrushMappingMode.Absolute
+                };
+
+                dc.DrawRectangle(brush, null, new Rect(new Size(bounds.Width, bounds.Height)));
+            }
+
+            rtb.Render(dv);
+
+            var whiteRect = new Rectangle
+            {
+                Width = bounds.Width,
+                Height = bounds.Height,
+                Fill = Brushes.White,
+                IsHitTestVisible = false
+            };
+            Canvas.SetLeft(whiteRect, bounds.X);
+            Canvas.SetTop(whiteRect, bounds.Y);
+
+            var image = new Image
+            {
+                Source = rtb,
+                Width = bounds.Width,
+                Height = bounds.Height,
+                Stretch = Stretch.Fill,
+                IsEnabled = true
+            };
+            Canvas.SetLeft(image, bounds.X);
+            Canvas.SetTop(image, bounds.Y);
+
+            image.MouseLeftButtonDown += Image_MouseLeftButtonDown;
+            image.MouseMove += Image_MouseMove;
+            image.MouseLeftButtonUp += Image_MouseLeftButtonUp;
+            image.MouseWheel += Image_MouseWheel;
+
+            _currentSelectionWhiteRect = whiteRect;
+            _currentSelectionImage = image;
+
+            var selectionBox = new SelectionBox(image);
+            _currentSelectionBox = selectionBox;
+
+            if (_currentEditableElement != null)
+                SetIsEditable(_currentEditableElement, false);
+
+            _currentEditableElement = image;
+            SetIsEditable(image, true);
+
+            int insertIndex = canvas.Children.Count;
+            canvas.Children.Insert(insertIndex, whiteRect);
+            canvas.Children.Insert(insertIndex + 1, image);
+            canvas.Children.Add(selectionBox);
+
+            SaveState(canvas);
+
+            ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
         private void InsertRichText(object parameter)
@@ -555,6 +706,8 @@ namespace PaintAnalog.ViewModels
                     border.BorderThickness = new Thickness(0);
                 }
 
+
+
                 if (element is Image image)
                 {
                     SelectionBox selectionBox = canvas.Children
@@ -569,7 +722,7 @@ namespace PaintAnalog.ViewModels
                     image.MouseLeftButtonUp -= Image_MouseLeftButtonUp;
                     image.MouseWheel -= Image_MouseWheel;
 
-                    image.IsHitTestVisible = false; 
+                    image.IsHitTestVisible = false;
                 }
             }
 
@@ -581,7 +734,7 @@ namespace PaintAnalog.ViewModels
             IsEditingText = false;
             IsEditingImage = false;
 
-            SaveState(canvas); 
+            SaveState(canvas);
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }

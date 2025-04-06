@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using PaintAnalog.ViewModels;
 
 namespace PaintAnalog.Views
 {
@@ -28,6 +29,13 @@ namespace PaintAnalog.Views
         private void FillSelected(object sender, RoutedEventArgs e) 
         {
             SelectedTool = "Fill";
+            DialogResult = true;
+            Close();
+        }
+
+        private void SelectionSelected(object sender, RoutedEventArgs e)
+        {
+            SelectedTool = "Selection"; 
             DialogResult = true;
             Close();
         }

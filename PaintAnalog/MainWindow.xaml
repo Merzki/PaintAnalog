@@ -22,6 +22,7 @@
     <DockPanel>
         <DockPanel.InputBindings>
             <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
+            <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyLastImageCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteImageCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />
             <KeyBinding Key="S" Modifiers="Control" Command="{Binding ConfirmChangesCommand}" CommandParameter="{Binding ElementName=PaintCanvas}" />

@@ -147,6 +147,12 @@ namespace PaintAnalog
             var position = e.GetPosition(PaintCanvas);
             UpdateBrushCursor(position);
 
+            if (ViewModel?.IsSelecting ?? false)
+            {
+                ViewModel?.UpdateSelection(position, PaintCanvas);
+                return;
+            }
+
             if (_isDrawing && e.LeftButton == MouseButtonState.Pressed)
             {
                 if (_currentTool == "Eraser" && _currentShapeElement is Polyline eraserPolyline)
@@ -189,7 +195,7 @@ namespace PaintAnalog
             if (_brushCursor == null)
                 return;
 
-            if (_currentTool == "Fill")
+            if (_currentTool == "Fill" || _currentTool == "Selection")
             {
                 _brushCursor.Visibility = Visibility.Hidden;
             }
@@ -222,6 +228,12 @@ namespace PaintAnalog
 
             if (ViewModel?.IsEditingImage == true || ViewModel?.IsEditingText == true)
             {
+                return;
+            }
+
+            if (_currentTool == "Selection")
+            {
+                ViewModel?.StartSelection(position, PaintCanvas);
                 return;
             }
 
@@ -275,6 +287,12 @@ namespace PaintAnalog
 
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (ViewModel?.IsSelecting ?? false)
+            {
+                ViewModel?.EndSelection(PaintCanvas);
+                return;
+            }
+
             if (_isDrawing && e.LeftButton == MouseButtonState.Released)
             {
                 _isDrawing = false;
@@ -369,7 +387,7 @@ namespace PaintAnalog
                 SettingsButton.IsEnabled = true;
                 SettingsButton.Click += OpenEraserSettings;
             }
-            else if (_currentTool == "Fill")
+            else if (_currentTool == "Fill" || _currentTool == "Selection")
             {
                 SettingsButton.Content = "No Settings";
                 SettingsButton.IsEnabled = false;
