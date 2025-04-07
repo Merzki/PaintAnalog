@@ -108,6 +108,8 @@ namespace PaintAnalog
                 CanvasScrollViewer.ScrollToVerticalOffset(0);
 
                 RemoveOutOfBoundsElements();
+
+                ViewModel.SaveState(PaintCanvas); 
             }
         }
 

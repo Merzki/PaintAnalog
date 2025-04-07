@@ -659,21 +659,16 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null) return false;
 
-            bool hasEditableImage = false;
-
             foreach (var element in canvas.Children)
             {
                 if (element is Border border && border.Child is System.Windows.Controls.RichTextBox richTextBox && !richTextBox.IsReadOnly)
                     return true;
 
-                if (element is Image image && image.IsHitTestVisible)
-                    hasEditableImage = true; 
-
                 if (element is SelectionBox)
-                    return true; 
+                    return true;
             }
 
-            return hasEditableImage; 
+            return false;
         }
 
         private void ConfirmChanges(object parameter)
@@ -986,6 +981,8 @@ namespace PaintAnalog.ViewModels
                     canvas.Children.Add(brushCursor);
                     Panel.SetZIndex(brushCursor, int.MaxValue);
                 }
+
+                SaveState(canvas);
             }
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
