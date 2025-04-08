@@ -20,8 +20,8 @@ namespace PaintAnalog.ViewModels
     {
         private string _title = "Paint Analog";
         private SolidColorBrush _selectedColor = new SolidColorBrush(Colors.Black);
-        private readonly Stack<UIElement[]> _undoElements = new();
-        private readonly Stack<UIElement[]> _redoElements = new();
+        private Stack<CanvasElementState[]> _undoElements = new();
+        private Stack<CanvasElementState[]> _redoElements = new();
         private double _textSize = 12;
         private FontFamily _selectedFontFamily = new FontFamily("Segoe UI");
         private UIElementCollection _canvasChildren;
@@ -144,6 +144,11 @@ namespace PaintAnalog.ViewModels
             set => SetProperty(ref _isSelecting, value);
         }
 
+        public class CanvasElementState
+        {
+            public UIElement Element { get; set; }
+            public bool IsHitTestVisible { get; set; }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -232,6 +237,10 @@ namespace PaintAnalog.ViewModels
 
         public void StartSelection(Point startPoint, Canvas canvas)
         {
+            if (_currentSelectionImage != null || _currentSelectionBox != null || _currentSelectionWhiteRect != null)
+            {
+                ConfirmChanges(canvas); 
+            }
 
             SaveState(canvas);
 
@@ -591,7 +600,7 @@ namespace PaintAnalog.ViewModels
 
         private void Image_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (sender is Image image)
+            if (sender is Image image && GetIsEditable(image))
             {
                 var transform = image.RenderTransform as RotateTransform;
                 if (transform == null)
@@ -601,7 +610,7 @@ namespace PaintAnalog.ViewModels
                     image.RenderTransformOrigin = new Point(0.5, 0.5);
                 }
 
-                double angle = transform.Angle + (e.Delta > 0 ? 10 : -10); 
+                double angle = transform.Angle + (e.Delta > 0 ? 10 : -10);
                 transform.Angle = angle;
 
                 e.Handled = true;
@@ -610,7 +619,7 @@ namespace PaintAnalog.ViewModels
 
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Image image)
+            if (sender is Image image && GetIsEditable(image))
             {
                 _isDragging = true;
                 _draggedImage = image;
@@ -622,7 +631,7 @@ namespace PaintAnalog.ViewModels
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDragging && _draggedImage != null)
+            if (_isDragging && _draggedImage != null && GetIsEditable(_draggedImage))
             {
                 var canvas = VisualTreeHelper.GetParent(_draggedImage) as Canvas;
                 if (canvas != null)
@@ -866,14 +875,17 @@ namespace PaintAnalog.ViewModels
         {
             foreach (var element in canvas.Children.OfType<Image>())
             {
-                if (GetIsEditable(element))  
-                {
-                    element.MouseWheel += Image_MouseWheel;
-                    element.MouseLeftButtonDown += Image_MouseLeftButtonDown;
-                    element.MouseMove += Image_MouseMove;
-                    element.MouseLeftButtonUp += Image_MouseLeftButtonUp;
-                    element.IsHitTestVisible = true;
-                }
+                if (!element.IsHitTestVisible) continue;
+
+                element.MouseWheel -= Image_MouseWheel;
+                element.MouseLeftButtonDown -= Image_MouseLeftButtonDown;
+                element.MouseMove -= Image_MouseMove;
+                element.MouseLeftButtonUp -= Image_MouseLeftButtonUp;
+
+                element.MouseWheel += Image_MouseWheel;
+                element.MouseLeftButtonDown += Image_MouseLeftButtonDown;
+                element.MouseMove += Image_MouseMove;
+                element.MouseLeftButtonUp += Image_MouseLeftButtonUp;
             }
         }
 
@@ -902,16 +914,20 @@ namespace PaintAnalog.ViewModels
         {
             if (canvas == null) return;
 
-            var currentElements = canvas.Children.Cast<UIElement>().ToArray();
+            var currentElements = canvas.Children
+                .Cast<UIElement>()
+                .Select(el => new CanvasElementState
+                {
+                    Element = el,
+                    IsHitTestVisible = el.IsHitTestVisible
+                })
+                .ToArray();
 
-            if (_undoElements.Count == 0 || !currentElements.SequenceEqual(_undoElements.Peek()))
-            {
-                _undoElements.Push(currentElements);
-                _redoElements.Clear();
+            _undoElements.Push(currentElements);
+            _redoElements.Clear();
 
-                ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
-                ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
-            }
+            ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
         }
 
         private void Undo(object parameter)
@@ -919,11 +935,11 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null || _undoElements.Count <= 1) return;
 
-            var currentElements = _undoElements.Pop();
-            _redoElements.Push(currentElements);
+            var current = _undoElements.Pop();
+            _redoElements.Push(current);
 
-            var previousElements = _undoElements.Peek();
-            RestoreCanvas(canvas, previousElements);
+            var previous = _undoElements.Peek();
+            RestoreCanvas(canvas, previous);
 
             RestoreImageHandlers(canvas);
 
@@ -946,12 +962,14 @@ namespace PaintAnalog.ViewModels
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
-        private void RestoreCanvas(Canvas canvas, UIElement[] elements)
+        private void RestoreCanvas(Canvas canvas, CanvasElementState[] elements)
         {
             canvas.Children.Clear();
-            foreach (var element in elements)
+
+            foreach (var state in elements)
             {
-                canvas.Children.Add(element);
+                state.Element.IsHitTestVisible = state.IsHitTestVisible;
+                canvas.Children.Add(state.Element);
             }
         }
 
@@ -981,8 +999,6 @@ namespace PaintAnalog.ViewModels
                     canvas.Children.Add(brushCursor);
                     Panel.SetZIndex(brushCursor, int.MaxValue);
                 }
-
-                SaveState(canvas);
             }
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
