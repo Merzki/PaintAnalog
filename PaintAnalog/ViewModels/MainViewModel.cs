@@ -909,6 +909,7 @@ namespace PaintAnalog.ViewModels
                 Cursor = Cursors.SizeNWSE
             };
         }
+        private CanvasElementState[] _lastSavedState;
 
         public void SaveState(Canvas canvas)
         {
@@ -923,11 +924,29 @@ namespace PaintAnalog.ViewModels
                 })
                 .ToArray();
 
+            if (_lastSavedState != null && AreStatesEqual(_lastSavedState, currentElements))
+                return;
+
+            _lastSavedState = currentElements;
             _undoElements.Push(currentElements);
             _redoElements.Clear();
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+        }
+
+        private bool AreStatesEqual(CanvasElementState[] a, CanvasElementState[] b)
+        {
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (!ReferenceEquals(a[i].Element, b[i].Element) ||
+                    a[i].IsHitTestVisible != b[i].IsHitTestVisible)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void Undo(object parameter)
