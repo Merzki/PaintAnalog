@@ -104,7 +104,7 @@
               Background="Gray">
             <Grid>
                 <Canvas x:Name="PaintCanvas" Background="White" Width="1200" Height="800"
-                HorizontalAlignment="Left" VerticalAlignment="Top" ClipToBounds="True"
+                HorizontalAlignment="Left" VerticalAlignment="Top" ClipToBounds="True" Focusable="True"
                 MouseDown="Canvas_MouseDown"
                 MouseMove="Canvas_MouseMove"
                 MouseUp="Canvas_MouseUp"      

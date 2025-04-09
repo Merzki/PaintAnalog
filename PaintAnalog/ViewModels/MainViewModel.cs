@@ -909,6 +909,7 @@ namespace PaintAnalog.ViewModels
                 Cursor = Cursors.SizeNWSE
             };
         }
+
         private CanvasElementState[] _lastSavedState;
 
         public void SaveState(Canvas canvas)
@@ -972,9 +973,11 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null || _redoElements.Count == 0) return;
 
-            var nextElements = _redoElements.Pop();
-            _undoElements.Push(nextElements);
-            RestoreCanvas(canvas, nextElements);
+            var next = _redoElements.Pop();
+            _undoElements.Push(next);
+
+            RestoreCanvas(canvas, next);
+            RestoreImageHandlers(canvas);
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
@@ -1011,13 +1014,15 @@ namespace PaintAnalog.ViewModels
 
                 var brushCursor = canvas.Children.OfType<Ellipse>().FirstOrDefault(e => e.Name == "BrushCursor");
 
-                canvas.Children.Clear(); 
+                canvas.Children.Clear();
 
                 if (brushCursor != null)
                 {
                     canvas.Children.Add(brushCursor);
                     Panel.SetZIndex(brushCursor, int.MaxValue);
                 }
+
+                SaveState(canvas);
             }
 
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
@@ -1039,49 +1044,62 @@ namespace PaintAnalog.ViewModels
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                Rect bounds = new Rect();
-                foreach (UIElement element in canvas.Children)
+                var brushCursor = canvas.Children.OfType<Ellipse>().FirstOrDefault(e => e.Name == "BrushCursor");
+                var originalVisibility = brushCursor?.Visibility ?? Visibility.Visible;
+                if (brushCursor != null)
+                    brushCursor.Visibility = Visibility.Hidden;
+
+                try
                 {
-                    if (element.Visibility == Visibility.Visible)
+                    Rect bounds = new Rect();
+                    foreach (UIElement element in canvas.Children)
                     {
-                        Rect elementBounds = VisualTreeHelper.GetDescendantBounds(element);
-                        if (elementBounds.IsEmpty) continue;
+                        if (element.Visibility == Visibility.Visible)
+                        {
+                            Rect elementBounds = VisualTreeHelper.GetDescendantBounds(element);
+                            if (elementBounds.IsEmpty) continue;
 
-                        Point elementPosition = new Point(Canvas.GetLeft(element), Canvas.GetTop(element));
-                        if (double.IsNaN(elementPosition.X)) elementPosition.X = 0;
-                        if (double.IsNaN(elementPosition.Y)) elementPosition.Y = 0;
+                            Point elementPosition = new Point(Canvas.GetLeft(element), Canvas.GetTop(element));
+                            if (double.IsNaN(elementPosition.X)) elementPosition.X = 0;
+                            if (double.IsNaN(elementPosition.Y)) elementPosition.Y = 0;
 
-                        GeneralTransform transform = element.TransformToAncestor(canvas);
-                        elementPosition = transform.Transform(elementPosition);
+                            GeneralTransform transform = element.TransformToAncestor(canvas);
+                            elementPosition = transform.Transform(elementPosition);
 
-                        bounds.Union(new Rect(elementPosition, elementBounds.Size));
+                            bounds.Union(new Rect(elementPosition, elementBounds.Size));
+                        }
+                    }
+
+                    if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+                    {
+                        System.Windows.MessageBox.Show("Canvas is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    var renderBitmap = new RenderTargetBitmap(
+                        (int)Math.Ceiling(canvas.ActualWidth),
+                        (int)Math.Ceiling(canvas.ActualHeight),
+                        ImageDpiX, ImageDpiY, PixelFormats.Pbgra32);
+
+                    var visual = new DrawingVisual();
+                    using (var context = visual.RenderOpen())
+                    {
+                        context.DrawRectangle(new VisualBrush(canvas), null, new Rect(new Point(), new Size(canvas.ActualWidth, canvas.ActualHeight)));
+                    }
+                    renderBitmap.Render(visual);
+
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+                    using (var stream = System.IO.File.Create(saveFileDialog.FileName))
+                    {
+                        encoder.Save(stream);
                     }
                 }
-
-                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+                finally
                 {
-                    System.Windows.MessageBox.Show("Canva is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var renderBitmap = new RenderTargetBitmap(
-                    (int)Math.Ceiling(canvas.ActualWidth),
-                    (int)Math.Ceiling(canvas.ActualHeight),
-                    ImageDpiX, ImageDpiY, PixelFormats.Pbgra32);
-
-                var visual = new DrawingVisual();
-                using (var context = visual.RenderOpen())
-                {
-                    context.DrawRectangle(new VisualBrush(canvas), null, new Rect(new Point(), new Size(canvas.ActualWidth, canvas.ActualHeight)));
-                }
-                renderBitmap.Render(visual);
-
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-
-                using (var stream = System.IO.File.Create(saveFileDialog.FileName))
-                {
-                    encoder.Save(stream);
+                    if (brushCursor != null)
+                        brushCursor.Visibility = originalVisibility;
                 }
             }
         }
@@ -1143,6 +1161,8 @@ namespace PaintAnalog.ViewModels
                     Canvas.SetTop(image, 0);
                     paintCanvas.Children.Add(image);
                     SetIsEditable(image, false);
+
+                    paintCanvas.Focus();
 
                     SaveState(paintCanvas);
                 }
