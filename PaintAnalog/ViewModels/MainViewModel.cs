@@ -148,6 +148,8 @@ namespace PaintAnalog.ViewModels
         {
             public UIElement Element { get; set; }
             public bool IsHitTestVisible { get; set; }
+            public double CanvasWidth { get; set; }
+            public double CanvasHeight { get; set; }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -916,12 +918,17 @@ namespace PaintAnalog.ViewModels
         {
             if (canvas == null) return;
 
+            double width = canvas.Width;
+            double height = canvas.Height;
+
             var currentElements = canvas.Children
                 .Cast<UIElement>()
                 .Select(el => new CanvasElementState
                 {
                     Element = el,
-                    IsHitTestVisible = el.IsHitTestVisible
+                    IsHitTestVisible = el.IsHitTestVisible,
+                    CanvasWidth = width,
+                    CanvasHeight = height
                 })
                 .ToArray();
 
@@ -939,14 +946,18 @@ namespace PaintAnalog.ViewModels
         private bool AreStatesEqual(CanvasElementState[] a, CanvasElementState[] b)
         {
             if (a.Length != b.Length) return false;
+
             for (int i = 0; i < a.Length; i++)
             {
                 if (!ReferenceEquals(a[i].Element, b[i].Element) ||
-                    a[i].IsHitTestVisible != b[i].IsHitTestVisible)
+                    a[i].IsHitTestVisible != b[i].IsHitTestVisible ||
+                    a[i].CanvasWidth != b[i].CanvasWidth ||
+                    a[i].CanvasHeight != b[i].CanvasHeight)
                 {
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -986,6 +997,12 @@ namespace PaintAnalog.ViewModels
 
         private void RestoreCanvas(Canvas canvas, CanvasElementState[] elements)
         {
+            if (elements.Length > 0)
+            {
+                canvas.Width = elements[0].CanvasWidth;
+                canvas.Height = elements[0].CanvasHeight;
+            }
+
             canvas.Children.Clear();
 
             foreach (var state in elements)

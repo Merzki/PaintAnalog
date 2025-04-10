@@ -95,6 +95,7 @@ namespace PaintAnalog
             var dialog = new ResizeCanvasDialog(PaintCanvas.Width, PaintCanvas.Height);
             if (dialog.ShowDialog() == true)
             {
+
                 double newWidth = dialog.NewWidth;
                 double newHeight = dialog.NewHeight;
 
