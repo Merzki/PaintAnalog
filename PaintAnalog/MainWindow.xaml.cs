@@ -438,6 +438,12 @@ namespace PaintAnalog
             int canvasWidth = (int)(PaintCanvas.ActualWidth * _zoomScale);
             int canvasHeight = (int)(PaintCanvas.ActualHeight * _zoomScale);
 
+            if (ViewModel != null && ViewModel.IsFirstState)
+            {
+                ViewModel.SaveState(PaintCanvas);
+                ViewModel.IsFirstState = false;
+            }
+
             var renderTarget = new RenderTargetBitmap(canvasWidth, canvasHeight, 96, 96, PixelFormats.Pbgra32);
 
             RenderOptions.SetBitmapScalingMode(PaintCanvas, BitmapScalingMode.NearestNeighbor);

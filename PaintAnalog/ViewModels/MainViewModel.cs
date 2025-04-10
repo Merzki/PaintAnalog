@@ -152,6 +152,8 @@ namespace PaintAnalog.ViewModels
             public double CanvasHeight { get; set; }
         }
 
+        public bool IsFirstState { get; set; } = true;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ICommand InsertTextCommand { get; }
