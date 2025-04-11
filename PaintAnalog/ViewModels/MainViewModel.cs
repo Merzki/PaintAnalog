@@ -974,6 +974,8 @@ namespace PaintAnalog.ViewModels
             var previous = _undoElements.Peek();
             RestoreCanvas(canvas, previous);
 
+            _lastSavedState = previous;
+
             RestoreImageHandlers(canvas);
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
@@ -990,6 +992,9 @@ namespace PaintAnalog.ViewModels
             _undoElements.Push(next);
 
             RestoreCanvas(canvas, next);
+
+            _lastSavedState = next;
+
             RestoreImageHandlers(canvas);
 
             ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
