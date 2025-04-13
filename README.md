@@ -7,16 +7,16 @@
 
 ## Table of Contents
 
-- [Project Description](#-project-description)
-- [Features](#-features)
-- [Screenshots](#-screenshots)
-- [Installation and Launch](#-installation-and-launch)
-- [Controls](#-controls)
-- [Project Structure](#-project-structure)
-- [Technologies Used](#-technologies-used)
-- [Implementation Details](#-implementation-details)
-- [Future Plans](#-future-plans)
-- [Author](#-author)
+- [Project Description](#project-description)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Installation and Launch](#installation-and-launch)
+- [Controls](#controls)
+- [Project Structure](#project-structure)
+- [Technologies Used](#technologies-used)
+- [Implementation Details](#implementation-details)
+- [Future Plans](#future-plans)
+- [Author](#author)
 
 ---
 
@@ -28,7 +28,14 @@ Brief overview of what the project is, why it was created, and what goals it ach
 
 ## Features
 
-A list of the main features the app provides will be added in future
+- **Drawing & Editing** — Freeform brush drawing, image and text insertion with support for resizing, rotation, and styling (font, size, bold, italic, underline)
+- **Color & Formatting** — Custom color picker and rich text formatting via toolbar toggles
+- **Canvas Management** — Clear canvas, dynamically resize it, and zoom using the mouse wheel
+- **Undo / Redo & Confirm** — Revert or apply recent actions, including confirm edits to elements
+- **Clipboard Support** — Copy and paste last inserted image using Ctrl+C / Ctrl+V
+- **File Operations** — Save and load canvas content using context menu options
+- **Extended Toolbox** — Access additional tools and settings through a separate dialog window
+- **MVVM Architecture** — Fully data-bound design using `MainViewModel` and command bindings
 
 ---
 
@@ -79,4 +86,3 @@ List any planned features or improvements will be added in future
 Merzki
 
 ---
-
