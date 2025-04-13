@@ -22,7 +22,9 @@
 
 ## Project Description
 
-Brief overview of what the project is, why it was created, and what goals it achieves will be added in future
+PaintAnalog is a modern reinterpretation of classic MS Paint, designed to offer a cleaner interface and smoother interaction.  
+While preserving its original simplicity, the app introduces thoughtful changes to improve usability and overall user experience.  
+Familiar concepts have been streamlined or reworked to feel more intuitive in a contemporary context
 
 ---
 
