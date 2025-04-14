@@ -9,40 +9,7 @@
         <vm:MainViewModel />
     </Window.DataContext>
     <Window.Resources>
-        <Style x:Key="ToolBarButtonStyle" TargetType="Button">
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Padding" Value="15,5"/>
-            <Setter Property="Background" Value="#FFDDDDDD"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                        Background="{TemplateBinding Background}"
-                        CornerRadius="6"
-                        Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FFB0C4DE"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FFA0B0C0"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Background" Value="#FFEEEEEE"/>
-                                <Setter Property="Foreground" Value="#FFAAAAAA"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
+        
         <Style x:Key="ToggleButtonStyle" TargetType="ToggleButton">
             <Setter Property="Width" Value="40"/>
             <Setter Property="Height" Value="30"/>
@@ -84,24 +51,6 @@
             <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
-
-        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Margin" Value="5,0"/>
-            <Setter Property="Padding" Value="5,2"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="ItemTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" FontFamily="{Binding}" FontSize="14" />
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
         </Style>
 
     </Window.Resources>
@@ -156,10 +105,11 @@
         <TextBlock Text="Size:" Margin="5,0" VerticalAlignment="Center"/>
         <TextBox Width="50"
          Style="{StaticResource TextBoxStyle}"
-         Text="{Binding TextSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+         Text="{Binding TextSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TextSizeConverter}}"
          PreviewTextInput="OnlyNumbers_PreviewTextInput"
-         DataObject.Pasting="OnlyNumbers_OnPaste" />
-            <TextBlock Text="px" Margin="0,0,10,0" VerticalAlignment="Center"/>
+         DataObject.Pasting="OnlyNumbers_OnPaste"
+         LostFocus="TextBox_LostFocus"/>
+        <TextBlock Text="px" Margin="0,0,10,0" VerticalAlignment="Center"/>
         <ComboBox Width="130" Height="25"
           Style="{StaticResource ComboBoxStyle}"
           SelectedItem="{Binding SelectedFontFamily}">

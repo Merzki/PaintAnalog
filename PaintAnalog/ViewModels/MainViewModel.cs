@@ -22,7 +22,6 @@ namespace PaintAnalog.ViewModels
         private SolidColorBrush _selectedColor = new SolidColorBrush(Colors.Black);
         private Stack<CanvasElementState[]> _undoElements = new();
         private Stack<CanvasElementState[]> _redoElements = new();
-        private double _textSize = 12;
         private FontFamily _selectedFontFamily = new FontFamily("Segoe UI");
         private UIElementCollection _canvasChildren;
         private double _canvasWidth;
@@ -83,18 +82,19 @@ namespace PaintAnalog.ViewModels
             get => _isEditingText;
             set => SetProperty(ref _isEditingText, value);
         }
+
+        private double _textSize = 12;
         public double TextSize
         {
             get => _textSize;
             set
             {
-                var roundedValue = Math.Round(value); 
-                if (_textSize != roundedValue)
-                {
-                    SetProperty(ref _textSize, roundedValue);
-                }
+                if (double.IsNaN(value) || value <= 0) value = 12;
+                var rounded = Math.Round(value);
+                SetProperty(ref _textSize, rounded);
             }
         }
+
         public FontFamily SelectedFontFamily
         {
             get => _selectedFontFamily;

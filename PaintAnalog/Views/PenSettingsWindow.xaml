@@ -2,20 +2,29 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Pen Settings" Height="300" Width="400">
+
     <StackPanel Margin="10">
         <TextBlock Text="Pen Thickness" FontWeight="Bold" Margin="0,0,0,5" />
-        <Slider x:Name="ThicknessSlider" Minimum="1" Maximum="20"
-                Value="{Binding SelectedThickness}" 
-                TickFrequency="1" 
-                IsSnapToTickEnabled="True" 
+        <Slider x:Name="ThicknessSlider"
+                Style="{StaticResource CustomSliderStyle}"
+                Minimum="1" Maximum="50"
+                Value="{Binding SelectedThickness}"
+                TickFrequency="1"
+                IsSnapToTickEnabled="True"
                 Margin="0,0,0,10" />
+
         <TextBlock Text="Pen Shape" FontWeight="Bold" Margin="0,10,0,5" />
-        <ComboBox x:Name="ShapeComboBox" SelectedValue="{Binding SelectedShape}" SelectedValuePath="Tag" Margin="0,0,0,10">
+        <ComboBox x:Name="ShapeComboBox"
+                  Style="{StaticResource ComboBoxStyle}"
+                  SelectedValue="{Binding SelectedShape}"
+                  SelectedValuePath="Tag"
+                  Margin="0,0,0,10">
             <ComboBoxItem Content="Polyline" Tag="Polyline" />
             <ComboBoxItem Content="Rectangle" Tag="Rectangle" />
             <ComboBoxItem Content="Triangle" Tag="Triangle" />
             <ComboBoxItem Content="Ellipse" Tag="Ellipse" />
         </ComboBox>
-        <Button Content="Apply" Click="ApplyButton_Click" Margin="0,10,0,0" HorizontalAlignment="Center" />
+
+        <Button Content="Apply" Click="ApplyButton_Click" Style="{StaticResource ToolBarButtonStyle}" />
     </StackPanel>
 </Window>

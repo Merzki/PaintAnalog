@@ -1,8 +1,120 @@
 ﻿<Application x:Class="PaintAnalog.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:PaintAnalog.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <converters:TextSizeConverter x:Key="TextSizeConverter"/>
+
+        <Style x:Key="ToolBarButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="15,5"/>
+            <Setter Property="Background" Value="#FFDDDDDD"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFB0C4DE"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFA0B0C0"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#FFEEEEEE"/>
+                                <Setter Property="Foreground" Value="#FFAAAAAA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CustomSliderStyle" TargetType="Slider">
+            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="Background" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid VerticalAlignment="Center">
+                            <Track x:Name="PART_Track"
+                           IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                           Maximum="{TemplateBinding Maximum}"
+                           Minimum="{TemplateBinding Minimum}"
+                           Value="{TemplateBinding Value}">
+
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton 
+                                Style="{x:Null}" 
+                                Background="{TemplateBinding Foreground}" 
+                                Opacity="0.3"
+                                Height="2"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"/>
+                                </Track.DecreaseRepeatButton>
+
+                                <Track.Thumb>
+                                    <Thumb Width="16" Height="16">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{TemplateBinding Foreground}"
+                                                CornerRadius="8"
+                                                Width="16"
+                                                Height="16"
+                                                BorderThickness="0">
+                                                    <Border.Effect>
+                                                        <DropShadowEffect ShadowDepth="0" BlurRadius="4" Color="#88000000"/>
+                                                    </Border.Effect>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton 
+                                Style="{x:Null}" 
+                                Background="{TemplateBinding Background}" 
+                                Height="2"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontFamily="{Binding}" FontSize="14" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+        </Style>
         
     </Application.Resources>
 </Application>

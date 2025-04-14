@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -675,5 +676,19 @@ namespace PaintAnalog
         {
             return text.All(char.IsDigit);
         }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (string.IsNullOrWhiteSpace(textBox.Text) || !double.TryParse(textBox.Text, out _))
+                {
+                    textBox.Text = "12"; 
+                    var binding = BindingOperations.GetBindingExpression(textBox, TextBox.TextProperty);
+                    binding?.UpdateSource(); 
+                }
+            }
+        }
+
     }
 }
