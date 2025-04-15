@@ -150,6 +150,7 @@ namespace PaintAnalog.ViewModels
             public bool IsHitTestVisible { get; set; }
             public double CanvasWidth { get; set; }
             public double CanvasHeight { get; set; }
+            public bool? IsTextEditable { get; set; }
         }
 
         public bool IsFirstState { get; set; } = true;
@@ -925,12 +926,21 @@ namespace PaintAnalog.ViewModels
 
             var currentElements = canvas.Children
                 .Cast<UIElement>()
-                .Select(el => new CanvasElementState
+                .Select(el =>
                 {
-                    Element = el,
-                    IsHitTestVisible = el.IsHitTestVisible,
-                    CanvasWidth = width,
-                    CanvasHeight = height
+                    bool? isTextEditable = null;
+
+                    if (el is Border border && border.Child is System.Windows.Controls.RichTextBox rtb)
+                        isTextEditable = !rtb.IsReadOnly;
+
+                    return new CanvasElementState
+                    {
+                        Element = el,
+                        IsHitTestVisible = el.IsHitTestVisible,
+                        CanvasWidth = width,
+                        CanvasHeight = height,
+                        IsTextEditable = isTextEditable
+                    };
                 })
                 .ToArray();
 
@@ -954,7 +964,8 @@ namespace PaintAnalog.ViewModels
                 if (!ReferenceEquals(a[i].Element, b[i].Element) ||
                     a[i].IsHitTestVisible != b[i].IsHitTestVisible ||
                     a[i].CanvasWidth != b[i].CanvasWidth ||
-                    a[i].CanvasHeight != b[i].CanvasHeight)
+                    a[i].CanvasHeight != b[i].CanvasHeight ||
+                    a[i].IsTextEditable != b[i].IsTextEditable)
                 {
                     return false;
                 }
@@ -1011,12 +1022,61 @@ namespace PaintAnalog.ViewModels
             }
 
             canvas.Children.Clear();
+            IsEditingText = false;
+            IsEditingImage = false;
 
             foreach (var state in elements)
             {
-                state.Element.IsHitTestVisible = state.IsHitTestVisible;
-                canvas.Children.Add(state.Element);
+                var element = state.Element;
+                element.IsHitTestVisible = state.IsHitTestVisible;
+
+                if (element is Border border && border.Child is System.Windows.Controls.RichTextBox rtb)
+                {
+                    if (state.IsTextEditable == true)
+                    {
+                        rtb.IsReadOnly = false;
+                        rtb.Focusable = true;
+                        rtb.Cursor = Cursors.IBeam;
+
+                        rtb.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                        rtb.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+
+                        border.BorderBrush = Brushes.Gray;
+                        border.BorderThickness = new Thickness(1);
+
+                        AddBorderEventHandlers(border);
+                        AutoResizeRichTextBox(rtb, border); 
+                        IsEditingText = true;
+                    }
+                    else
+                    {
+                        border.MouseLeftButtonDown -= Border_MouseLeftButtonDown;
+                        border.MouseMove -= Border_MouseMove;
+                        border.MouseLeftButtonUp -= Border_MouseLeftButtonUp;
+
+                        rtb.IsReadOnly = true;
+                        rtb.Focusable = false;
+                        rtb.Cursor = Cursors.Arrow;
+                        rtb.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                        rtb.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+
+                        border.BorderBrush = Brushes.Transparent;
+                        border.BorderThickness = new Thickness(0);
+                    }
+                }
+
+                if (element is Image img && !state.IsHitTestVisible)
+                {
+                    img.MouseLeftButtonDown -= Image_MouseLeftButtonDown;
+                    img.MouseMove -= Image_MouseMove;
+                    img.MouseLeftButtonUp -= Image_MouseLeftButtonUp;
+                    img.MouseWheel -= Image_MouseWheel;
+                }
+
+                canvas.Children.Add(element);
             }
+
+            ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
         private bool CanUndo(object parameter)
