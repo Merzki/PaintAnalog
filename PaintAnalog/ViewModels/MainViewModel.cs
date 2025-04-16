@@ -244,12 +244,13 @@ namespace PaintAnalog.ViewModels
         {
             if (_currentSelectionImage != null || _currentSelectionBox != null || _currentSelectionWhiteRect != null)
             {
-                ConfirmChanges(canvas); 
+                ConfirmChanges(canvas);
             }
 
             SaveState(canvas);
 
-            _selectionStart = startPoint;
+            _selectionStart = startPoint; 
+
             _selectionRect = new Rectangle
             {
                 Stroke = Brushes.Black,
@@ -258,8 +259,8 @@ namespace PaintAnalog.ViewModels
                 Fill = Brushes.Transparent
             };
 
-            Canvas.SetLeft(_selectionRect, startPoint.X);
-            Canvas.SetTop(_selectionRect, startPoint.Y);
+            Canvas.SetLeft(_selectionRect, _selectionStart.X);
+            Canvas.SetTop(_selectionRect, _selectionStart.Y);
             canvas.Children.Add(_selectionRect);
 
             _isSelecting = true;
@@ -267,7 +268,7 @@ namespace PaintAnalog.ViewModels
 
         public void UpdateSelection(Point currentPoint, Canvas canvas)
         {
-            if (!_isSelecting || _selectionRect == null) return; 
+            if (!_isSelecting || _selectionRect == null) return;
 
             double width = currentPoint.X - _selectionStart.X;
             double height = currentPoint.Y - _selectionStart.Y;
@@ -277,7 +278,8 @@ namespace PaintAnalog.ViewModels
             Canvas.SetLeft(_selectionRect, width > 0 ? _selectionStart.X : currentPoint.X);
             Canvas.SetTop(_selectionRect, height > 0 ? _selectionStart.Y : currentPoint.Y);
         }
-        public void EndSelection(Canvas canvas)
+
+        public void EndSelection(Canvas canvas, double zoomScale)
         {
             if (!_isSelecting || _selectionRect == null) return;
 
@@ -293,21 +295,26 @@ namespace PaintAnalog.ViewModels
             _isSelecting = false;
 
             if (bounds.Width <= 0 || bounds.Height <= 0)
-            {
                 return;
-            }
+
+            var renderWidth = (int)Math.Ceiling(bounds.Width * zoomScale);
+            var renderHeight = (int)Math.Ceiling(bounds.Height * zoomScale);
 
             var rtb = new RenderTargetBitmap(
-                (int)Math.Ceiling(bounds.Width),
-                (int)Math.Ceiling(bounds.Height),
-                96, 96, PixelFormats.Pbgra32);
+                renderWidth, renderHeight,
+                96 * zoomScale, 96 * zoomScale,
+                PixelFormats.Pbgra32);
 
             var dv = new DrawingVisual();
             using (var dc = dv.RenderOpen())
             {
                 var brush = new VisualBrush(canvas)
                 {
-                    Viewbox = bounds,
+                    Viewbox = new Rect(
+                        bounds.X * zoomScale,
+                        bounds.Y * zoomScale,
+                        bounds.Width * zoomScale,
+                        bounds.Height * zoomScale),
                     ViewboxUnits = BrushMappingMode.Absolute
                 };
 
@@ -360,7 +367,6 @@ namespace PaintAnalog.ViewModels
             canvas.Children.Add(selectionBox);
 
             SaveState(canvas);
-
             ((RelayCommand)ConfirmChangesCommand).RaiseCanExecuteChanged();
         }
 
@@ -719,8 +725,6 @@ namespace PaintAnalog.ViewModels
                     border.BorderBrush = Brushes.Transparent;
                     border.BorderThickness = new Thickness(0);
                 }
-
-
 
                 if (element is Image image)
                 {

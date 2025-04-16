@@ -327,7 +327,7 @@ namespace PaintAnalog
         {
             if (ViewModel?.IsSelecting ?? false)
             {
-                ViewModel?.EndSelection(PaintCanvas);
+                ViewModel.EndSelection(PaintCanvas, _zoomScale);
                 return;
             }
 
