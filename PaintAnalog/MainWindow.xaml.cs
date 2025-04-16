@@ -19,6 +19,8 @@ namespace PaintAnalog
         private List<Point> _pointBuffer = new List<Point>();
         private List<Point> _pendingPoints = new List<Point>();
         private const double InterpolationStep = 0.3;
+        private const int MaxBufferSize = 1000;
+        private const int RenderBatchSize = 50;
 
         private UIElement _selectedElement;
         private Point _elementStartPoint;
@@ -66,11 +68,16 @@ namespace PaintAnalog
         {
             if (_currentShapeElement is Polyline polyline && _pendingPoints.Count > 0)
             {
-                foreach (var point in _pendingPoints)
+                var startTime = DateTime.Now;
+
+                while (_pendingPoints.Count > 0)
                 {
-                    polyline.Points.Add(point);
+                    polyline.Points.Add(_pendingPoints[0]);
+                    _pendingPoints.RemoveAt(0);
+
+                    if ((DateTime.Now - startTime).TotalMilliseconds > 10)
+                        break;
                 }
-                _pendingPoints.Clear();
             }
         }
 
@@ -145,6 +152,10 @@ namespace PaintAnalog
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             var now = DateTime.Now;
+            var timeSinceLastMove = (now - _lastMouseMoveTime).TotalMilliseconds;
+
+            if (timeSinceLastMove < 5) 
+                return;
 
             _lastMouseMoveTime = now;
 
@@ -165,7 +176,8 @@ namespace PaintAnalog
                 }
                 else if (_currentTool == "Brush" && _currentShapeElement is Polyline brushPolyline)
                 {
-                    HandleDrawing(brushPolyline, position, brushPolyline.Stroke, InterpolationStep);
+                    double adaptiveStep = _currentThickness > 20 ? InterpolationStep * 2 : InterpolationStep;
+                    HandleDrawing(brushPolyline, position, brushPolyline.Stroke, adaptiveStep);
                 }
                 else
                 {
@@ -181,12 +193,20 @@ namespace PaintAnalog
                 _pointBuffer.Add(position);
             }
 
+            if (_pointBuffer.Count > MaxBufferSize)
+            {
+                _pointBuffer.RemoveRange(0, _pointBuffer.Count - MaxBufferSize);
+            }
+
             if (_pointBuffer.Count >= 2)
             {
                 var smoothPoints = InterpolatePoints(_pointBuffer, interpolationStep);
-                foreach (var point in smoothPoints)
+                
+                for (int i = 0; i < smoothPoints.Count; i += RenderBatchSize)
                 {
-                    polyline.Points.Add(point);
+                    int batchSize = Math.Min(RenderBatchSize, smoothPoints.Count - i);
+                    var batch = smoothPoints.GetRange(i, batchSize);
+                    _pendingPoints.AddRange(batch);
                 }
 
                 _pointBuffer.Clear();
@@ -208,8 +228,20 @@ namespace PaintAnalog
                 _brushCursor.Visibility = Visibility.Visible;
 
                 var brushColor = (ViewModel?.SelectedColor as SolidColorBrush)?.Color ?? Colors.Black;
-                _brushCursor.Width = _currentThickness;
-                _brushCursor.Height = _currentThickness;
+
+                if (_currentThickness > 20)
+                {
+                    _brushCursor.StrokeThickness = 1;
+                    _brushCursor.Width = _currentThickness;
+                    _brushCursor.Height = _currentThickness;
+                }
+                else
+                {
+                    _brushCursor.StrokeThickness = 1;
+                    _brushCursor.Width = _currentThickness;
+                    _brushCursor.Height = _currentThickness;
+                }
+
                 _brushCursor.Stroke = _currentTool == "Eraser" ? Brushes.Black : new SolidColorBrush(brushColor);
                 _brushCursor.Fill = _currentTool == "Eraser" ? Brushes.White : new SolidColorBrush(brushColor);
 
@@ -247,6 +279,8 @@ namespace PaintAnalog
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
+                _pointBuffer.Clear();
+                _pendingPoints.Clear();
 
                 if (_currentTool == "Eraser")
                 {
@@ -334,28 +368,36 @@ namespace PaintAnalog
         private List<Point> InterpolatePoints(List<Point> points, double step)
         {
             var interpolated = new List<Point>();
+            if (points.Count < 2) return interpolated;
+
+            interpolated.Add(points[0]);
+
             for (int i = 1; i < points.Count; i++)
             {
                 var p1 = points[i - 1];
                 var p2 = points[i];
                 double distance = GetDistance(p1, p2);
 
-                if (distance > step)
+                if (distance < step * 0.5)
+                    continue;
+
+                double adjustedStep = step;
+                if (distance > step * 3)
                 {
-                    int numSteps = (int)(distance / step);
-                    for (int j = 0; j <= numSteps; j++)
-                    {
-                        double t = j / (double)numSteps;
-                        double x = p1.X + t * (p2.X - p1.X);
-                        double y = p1.Y + t * (p2.Y - p1.Y);
-                        interpolated.Add(new Point(x, y));
-                    }
+                    adjustedStep = distance / 3;
                 }
-                else
+
+                int numSteps = (int)(distance / adjustedStep);
+                for (int j = 1; j <= numSteps; j++)
                 {
-                    interpolated.Add(p1);
+                    double t = j / (double)numSteps;
+                    double x = p1.X + t * (p2.X - p1.X);
+                    double y = p1.Y + t * (p2.Y - p1.Y);
+                    interpolated.Add(new Point(x, y));
                 }
             }
+
+            interpolated.Add(points[points.Count - 1]);
             return interpolated;
         }
 

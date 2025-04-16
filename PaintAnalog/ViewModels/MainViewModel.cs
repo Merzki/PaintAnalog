@@ -292,6 +292,11 @@ namespace PaintAnalog.ViewModels
             _selectionRect = null;
             _isSelecting = false;
 
+            if (bounds.Width <= 0 || bounds.Height <= 0)
+            {
+                return;
+            }
+
             var rtb = new RenderTargetBitmap(
                 (int)Math.Ceiling(bounds.Width),
                 (int)Math.Ceiling(bounds.Height),
