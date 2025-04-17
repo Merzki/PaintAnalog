@@ -8,6 +8,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using PaintAnalog.ViewModels;
 using PaintAnalog.Views;
+using System.ComponentModel;
 
 namespace PaintAnalog
 {
@@ -66,6 +67,36 @@ namespace PaintAnalog
 
             this.PreviewMouseLeftButtonUp += GlobalMouseLeftButtonUp;
             Mouse.AddLostMouseCaptureHandler(this, OnLostMouseCapture);
+
+            this.Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            if (PaintCanvas.Children.Count <= 1)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show(
+                "Do you want to save your work before exiting?",
+                "Save before exit",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                var viewModel = DataContext as ViewModels.MainViewModel;
+
+                if (viewModel?.SaveCanvasCommand?.CanExecute(PaintCanvas) == true)
+                {
+                    viewModel.SaveCanvasCommand.Execute(PaintCanvas);
+                }
+            }
+            else if (result == MessageBoxResult.Cancel)
+            {
+                e.Cancel = true;
+            }
         }
 
         private void GlobalMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
