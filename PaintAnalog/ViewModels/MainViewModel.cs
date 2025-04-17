@@ -264,6 +264,7 @@ namespace PaintAnalog.ViewModels
             canvas.Children.Add(_selectionRect);
 
             _isSelecting = true;
+            Mouse.Capture(Application.Current.MainWindow, CaptureMode.SubTree);
         }
 
         public void UpdateSelection(Point currentPoint, Canvas canvas)
@@ -281,6 +282,8 @@ namespace PaintAnalog.ViewModels
 
         public void EndSelection(Canvas canvas, double zoomScale)
         {
+            Mouse.Capture(null);
+
             if (!_isSelecting || _selectionRect == null) return;
 
             var bounds = new Rect(

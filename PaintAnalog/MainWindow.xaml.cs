@@ -57,10 +57,31 @@ namespace PaintAnalog
                 Height = _currentThickness,
                 IsHitTestVisible = false,
             };
+
             if (!PaintCanvas.Children.Contains(_brushCursor))
             {
                 PaintCanvas.Children.Add(_brushCursor);
                 Panel.SetZIndex(_brushCursor, int.MaxValue);
+            }
+
+            this.PreviewMouseLeftButtonUp += GlobalMouseLeftButtonUp;
+            Mouse.AddLostMouseCaptureHandler(this, OnLostMouseCapture);
+        }
+
+        private void GlobalMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (ViewModel?.IsSelecting ?? false)
+            {
+                ViewModel.EndSelection(PaintCanvas, _zoomScale);
+                e.Handled = true;
+            }
+        }
+
+        private void OnLostMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (ViewModel?.IsSelecting ?? false)
+            {
+                ViewModel.EndSelection(PaintCanvas, _zoomScale);
             }
         }
 
