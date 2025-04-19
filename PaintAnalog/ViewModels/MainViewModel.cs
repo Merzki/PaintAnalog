@@ -235,7 +235,11 @@ namespace PaintAnalog.ViewModels
 
             if (source == null) return;
 
-            Clipboard.SetImage(source);
+            var dataObject = new DataObject();
+            dataObject.SetImage(source);
+            dataObject.SetData("FromMyApp", true);
+
+            Clipboard.SetDataObject(dataObject);
 
             if (lastImage == _currentSelectionImage)
             {
@@ -244,7 +248,7 @@ namespace PaintAnalog.ViewModels
             else
             {
                 _clipboardImageIsFromApp = false;
-                _lastSelectionSize = null; 
+                _lastSelectionSize = null;
             }
         }
 
@@ -614,15 +618,21 @@ namespace PaintAnalog.ViewModels
                 double width = bitmap.Width;
                 double height = bitmap.Height;
 
+                var data = Clipboard.GetDataObject();
+                if (data != null && data.GetDataPresent("FromMyApp") && data.GetData("FromMyApp") is bool fromApp && fromApp)
+                {
+                    _clipboardImageIsFromApp = true;
+                }
+                else
+                {
+                    _clipboardImageIsFromApp = false;
+                    _lastSelectionSize = null;
+                }
+
                 if (_clipboardImageIsFromApp && _lastSelectionSize.HasValue)
                 {
                     width = _lastSelectionSize.Value.Width;
                     height = _lastSelectionSize.Value.Height;
-                }
-                else
-                {
-                    _lastSelectionSize = null;
-                    _clipboardImageIsFromApp = false;
                 }
 
                 var image = new Image
