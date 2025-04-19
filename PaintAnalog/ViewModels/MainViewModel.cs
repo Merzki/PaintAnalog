@@ -157,6 +157,9 @@ namespace PaintAnalog.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private Size? _lastSelectionSize = null;
+        private bool _clipboardImageIsFromApp = false;
+
         public ICommand InsertTextCommand { get; }
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
@@ -233,6 +236,16 @@ namespace PaintAnalog.ViewModels
             if (source == null) return;
 
             Clipboard.SetImage(source);
+
+            if (lastImage == _currentSelectionImage)
+            {
+                _clipboardImageIsFromApp = true;
+            }
+            else
+            {
+                _clipboardImageIsFromApp = false;
+                _lastSelectionSize = null; 
+            }
         }
 
         private Image? _currentSelectionImage;
@@ -344,8 +357,11 @@ namespace PaintAnalog.ViewModels
                 Stretch = Stretch.Fill,
                 IsEnabled = true
             };
+
             Canvas.SetLeft(image, bounds.X);
             Canvas.SetTop(image, bounds.Y);
+
+            _lastSelectionSize = new Size(bounds.Width, bounds.Height);
 
             image.MouseLeftButtonDown += Image_MouseLeftButtonDown;
             image.MouseMove += Image_MouseMove;
@@ -541,6 +557,9 @@ namespace PaintAnalog.ViewModels
             var canvas = parameter as Canvas;
             if (canvas == null) return;
 
+            _lastSelectionSize = null;
+            _clipboardImageIsFromApp = false;
+
             var openFileDialog = new OpenFileDialog
             {
                 Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif",
@@ -591,16 +610,31 @@ namespace PaintAnalog.ViewModels
                 SaveState(canvas);
 
                 var bitmap = Clipboard.GetImage();
+
+                double width = bitmap.Width;
+                double height = bitmap.Height;
+
+                if (_clipboardImageIsFromApp && _lastSelectionSize.HasValue)
+                {
+                    width = _lastSelectionSize.Value.Width;
+                    height = _lastSelectionSize.Value.Height;
+                }
+                else
+                {
+                    _lastSelectionSize = null;
+                    _clipboardImageIsFromApp = false;
+                }
+
                 var image = new Image
                 {
                     Source = bitmap,
-                    Width = bitmap.Width,
-                    Height = bitmap.Height,
+                    Width = width,
+                    Height = height,
                     Stretch = Stretch.Fill
                 };
 
-                Canvas.SetLeft(image, (canvas.ActualWidth - bitmap.Width) / 2);
-                Canvas.SetTop(image, (canvas.ActualHeight - bitmap.Height) / 2);
+                Canvas.SetLeft(image, (canvas.ActualWidth - width) / 2);
+                Canvas.SetTop(image, (canvas.ActualHeight - height) / 2);
 
                 image.MouseWheel += Image_MouseWheel;
                 image.MouseLeftButtonDown += Image_MouseLeftButtonDown;
