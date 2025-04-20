@@ -338,7 +338,7 @@ namespace PaintAnalog.ViewModels
                     ViewboxUnits = BrushMappingMode.Absolute
                 };
 
-                dc.DrawRectangle(brush, null, new Rect(new Size(bounds.Width, bounds.Height)));
+                dc.DrawRectangle(brush, null, new Rect(new Size(renderWidth / zoomScale, renderHeight / zoomScale)));
             }
 
             rtb.Render(dv);
