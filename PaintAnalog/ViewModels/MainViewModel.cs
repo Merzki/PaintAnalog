@@ -314,11 +314,11 @@ namespace PaintAnalog.ViewModels
             _selectionRect = null;
             _isSelecting = false;
 
-            if (bounds.Width <= 0 || bounds.Height <= 0)
-                return;
-
             var renderWidth = (int)Math.Ceiling(bounds.Width * zoomScale);
             var renderHeight = (int)Math.Ceiling(bounds.Height * zoomScale);
+
+            if (renderWidth <= 0 || renderHeight <= 0)
+                return;
 
             var rtb = new RenderTargetBitmap(
                 renderWidth, renderHeight,
@@ -350,6 +350,7 @@ namespace PaintAnalog.ViewModels
                 Fill = Brushes.White,
                 IsHitTestVisible = false
             };
+
             Canvas.SetLeft(whiteRect, bounds.X);
             Canvas.SetTop(whiteRect, bounds.Y);
 
