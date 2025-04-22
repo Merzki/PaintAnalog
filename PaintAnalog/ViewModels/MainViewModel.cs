@@ -198,17 +198,26 @@ namespace PaintAnalog.ViewModels
             var colorDialog = new Xceed.Wpf.Toolkit.ColorPicker
             {
                 SelectedColor = SelectedColor.Color,
-                UsingAlphaChannel = true
+                UsingAlphaChannel = true,
+                Width = 120,
+                Height = 25
             };
 
             var popup = new System.Windows.Controls.Primitives.Popup
             {
-                Placement = System.Windows.Controls.Primitives.PlacementMode.Center,
-                PlacementTarget = parameter as System.Windows.UIElement,
                 StaysOpen = false,
                 Child = colorDialog,
-                IsOpen = true
+                AllowsTransparency = true,
+                Placement = System.Windows.Controls.Primitives.PlacementMode.Absolute
             };
+
+            var mainWindow = Application.Current.MainWindow;
+
+            var screenPoint = mainWindow.PointToScreen(new Point(0, 0));
+
+            popup.HorizontalOffset = screenPoint.X;
+            popup.VerticalOffset = screenPoint.Y;
+            popup.IsOpen = true;
 
             colorDialog.MouseLeftButtonUp += (s, e) =>
             {
