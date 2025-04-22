@@ -99,6 +99,19 @@ namespace PaintAnalog
             }
         }
 
+        private void PaletteEllipse_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Ellipse ellipse && DataContext is MainViewModel vm)
+            {
+                var clickedBrush = ellipse.Fill as SolidColorBrush;
+                var index = vm.PaletteColors.IndexOf(clickedBrush);
+                if (index >= 0)
+                {
+                    vm.SelectedPaletteIndex = index;
+                }
+            }
+        }
+
         private void GlobalMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (ViewModel?.IsSelecting ?? false)

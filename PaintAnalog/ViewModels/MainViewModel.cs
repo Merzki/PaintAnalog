@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using WpfRichTextBox = System.Windows.Controls.RichTextBox;
 using XceedRichTextBox = Xceed.Wpf.Toolkit.RichTextBox;
+using System.Collections.ObjectModel;
 
 namespace PaintAnalog.ViewModels
 {
@@ -160,6 +161,33 @@ namespace PaintAnalog.ViewModels
         private Size? _lastSelectionSize = null;
         private bool _clipboardImageIsFromApp = false;
 
+        private ObservableCollection<SolidColorBrush> _paletteColors = new ObservableCollection<SolidColorBrush>
+        {
+            Brushes.Black, Brushes.Red, Brushes.Green, Brushes.Blue,
+            Brushes.Yellow, Brushes.Orange, Brushes.Purple, Brushes.Gray
+        };
+
+        public ObservableCollection<SolidColorBrush> PaletteColors
+        {
+            get => _paletteColors;
+            set => SetProperty(ref _paletteColors, value);
+        }
+
+        private int _selectedPaletteIndex = 0;
+        public int SelectedPaletteIndex
+        {
+            get => _selectedPaletteIndex;
+            set
+            {
+                if (_selectedPaletteIndex != value)
+                {
+                    _selectedPaletteIndex = value;
+                    SelectedColor = PaletteColors[_selectedPaletteIndex];
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public ICommand InsertTextCommand { get; }
         public ICommand ClearCanvasCommand { get; }
         public ICommand ChooseColorCommand { get; }
@@ -212,7 +240,6 @@ namespace PaintAnalog.ViewModels
             };
 
             var mainWindow = Application.Current.MainWindow;
-
             var screenPoint = mainWindow.PointToScreen(new Point(0, 0));
 
             popup.HorizontalOffset = screenPoint.X;
@@ -223,7 +250,9 @@ namespace PaintAnalog.ViewModels
             {
                 if (colorDialog.SelectedColor.HasValue)
                 {
-                    SelectedColor = new SolidColorBrush(colorDialog.SelectedColor.Value);
+                    var newColor = new SolidColorBrush(colorDialog.SelectedColor.Value);
+                    PaletteColors[SelectedPaletteIndex] = newColor; 
+                    SelectedColor = newColor;
                 }
                 popup.IsOpen = false;
             };
