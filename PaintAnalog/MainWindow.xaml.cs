@@ -71,6 +71,11 @@ namespace PaintAnalog
             this.Closing += MainWindow_Closing;
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            PaintCanvas.Focus();
+        }
+
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             if (PaintCanvas.Children.Count <= 1)
