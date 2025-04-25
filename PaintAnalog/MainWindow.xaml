@@ -165,17 +165,28 @@
                 </CompositeCollection>
             </ComboBox.ItemsSource>
         </ComboBox>
-        <ToggleButton Style="{StaticResource ToggleButtonStyle}" IsChecked="{Binding IsBold}" ToolTip="Bold (Ctrl+B)">
-            <TextBlock Text="B" FontWeight="Bold" />
-        </ToggleButton>
-        <ToggleButton Style="{StaticResource ToggleButtonStyle}" IsChecked="{Binding IsItalic}" ToolTip="Italic (Ctrl+I)">
-            <TextBlock Text="I" FontStyle="Italic" />
-        </ToggleButton>
-        <ToggleButton Style="{StaticResource ToggleButtonStyle}" IsChecked="{Binding IsUnderline}" ToolTip="Underline (Ctrl+U)">
-            <TextBlock Text="U" TextDecorations="Underline" />
-        </ToggleButton>
-    </StackPanel>
-</GroupBox>
+              <ToggleButton x:Name="BoldButton"
+              Style="{StaticResource ToggleButtonStyle}"
+              IsChecked="{Binding IsBold, Mode=TwoWay}"
+              ToolTip="Bold (Ctrl+B)">
+                            <TextBlock Text="B" FontWeight="Bold" />
+                        </ToggleButton>
+
+                        <ToggleButton x:Name="ItalicButton"
+              Style="{StaticResource ToggleButtonStyle}"
+              IsChecked="{Binding IsItalic, Mode=TwoWay}"
+              ToolTip="Italic (Ctrl+I)">
+                            <TextBlock Text="I" FontStyle="Italic" />
+                        </ToggleButton>
+
+                        <ToggleButton x:Name="UnderlineButton"
+              Style="{StaticResource ToggleButtonStyle}"
+              IsChecked="{Binding IsUnderline, Mode=TwoWay}"
+              ToolTip="Underline (Ctrl+U)">
+                            <TextBlock Text="U" TextDecorations="Underline" />
+                        </ToggleButton>
+                    </StackPanel>
+            </GroupBox>
 
                 <GroupBox Header="Palete" Margin="5" Padding="5">
                     <ItemsControl ItemsSource="{Binding PaletteColors}">

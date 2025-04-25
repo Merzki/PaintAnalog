@@ -74,6 +74,29 @@ namespace PaintAnalog
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             PaintCanvas.Focus();
+            AddHandler(Keyboard.KeyDownEvent, new KeyEventHandler(OnKeyDown), true);
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Key == Key.B)
+                {
+                    BoldButton.IsChecked = !BoldButton.IsChecked;
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.I)
+                {
+                    ItalicButton.IsChecked = !ItalicButton.IsChecked;
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.U)
+                {
+                    UnderlineButton.IsChecked = !UnderlineButton.IsChecked;
+                    e.Handled = true;
+                }
+            }
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
