@@ -100,15 +100,103 @@
 
         <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Margin" Value="5,0"/>
-            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Padding" Value="8,0,28,0"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter x:Name="ContentSite"
+                                                    Grid.Column="0"
+                                                    IsHitTestVisible="False"
+                                                    Content="{TemplateBinding SelectionBoxItem}"
+                                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                    ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Left"/>
+                                    <ToggleButton x:Name="ToggleButton"
+                                                Grid.Column="1"
+                                                Focusable="False"
+                                                IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                ClickMode="Press"
+                                                Width="24"
+                                                Margin="0,0,4,0">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent" Width="20" Height="20">
+                                                    <Path x:Name="Arrow"
+                                                          Fill="#FF666666"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid x:Name="DropDown"
+                                      SnapsToDevicePixels="True"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="White"
+                                            BorderBrush="#FFCCCCCC"
+                                            BorderThickness="1"
+                                            CornerRadius="6">
+                                        <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FFB0C4DE"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FFA0B0C0"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#FFEEEEEE"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FFDDDDDD"/>
+                                <Setter Property="Foreground" Value="#FFAAAAAA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <TextBlock Text="{Binding}" FontFamily="{Binding}" FontSize="14" />
+                        <TextBlock Text="{Binding}" 
+                                 FontFamily="{Binding}" 
+                                 FontSize="14"
+                                 Margin="4,2"
+                                 Padding="4,2"
+                                 VerticalAlignment="Center"/>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>

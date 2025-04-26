@@ -3,8 +3,15 @@
   "WorkspaceRootPath": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ASUS\\AppData\\Local\\Temp\\.vsdbgsrc\\0a84cc53936b314ba955b54f50bf4796d8234943f3fd7b93873381b45d404026\\XamlReader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -25,10 +32,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\converters\\colortovisibilityconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\converters\\colortovisibilityconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|solutionrelative:paintanalog\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C58F9ADE-D5FF-4DCA-9C21-0C157FE1A7D6}|PaintAnalog\\PaintAnalog.csproj|c:\\users\\asus\\source\\repos\\paintanalog\\paintanalog\\converters\\textsizeconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -90,7 +93,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "ResizeCanvasDialog.xaml",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\ResizeCanvasDialog.xaml",
               "RelativeDocumentMoniker": "PaintAnalog\\Views\\ResizeCanvasDialog.xaml",
@@ -107,51 +110,6 @@
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "App.xaml",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\App.xaml",
-              "RelativeDocumentMoniker": "PaintAnalog\\App.xaml",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\App.xaml",
-              "RelativeToolTip": "PaintAnalog\\App.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-12-16T03:46:30.874Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "PenSettingsWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\PenSettingsWindow.xaml",
-              "RelativeDocumentMoniker": "PaintAnalog\\Views\\PenSettingsWindow.xaml",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\PenSettingsWindow.xaml",
-              "RelativeToolTip": "PaintAnalog\\Views\\PenSettingsWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-12-20T04:23:35.217Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "ToolsWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\ToolsWindow.xaml",
-              "RelativeDocumentMoniker": "PaintAnalog\\Views\\ToolsWindow.xaml",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\ToolsWindow.xaml",
-              "RelativeToolTip": "PaintAnalog\\Views\\ToolsWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-12-23T16:26:20.721Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "EraserSettingsWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\EraserSettingsWindow.xaml",
-              "RelativeDocumentMoniker": "PaintAnalog\\Views\\EraserSettingsWindow.xaml",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\EraserSettingsWindow.xaml",
-              "RelativeToolTip": "PaintAnalog\\Views\\EraserSettingsWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-12-23T23:05:57.987Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "ViewModelBase.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\ViewModels\\ViewModelBase.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\ViewModels\\ViewModelBase.cs",
@@ -163,7 +121,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\MainWindow.xaml.cs",
@@ -176,7 +134,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "PenSettingsWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\PenSettingsWindow.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Views\\PenSettingsWindow.xaml.cs",
@@ -188,7 +146,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\MainWindow.xaml",
               "RelativeDocumentMoniker": "PaintAnalog\\MainWindow.xaml",
@@ -200,7 +158,65 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PenSettingsWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\PenSettingsWindow.xaml",
+              "RelativeDocumentMoniker": "PaintAnalog\\Views\\PenSettingsWindow.xaml",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\PenSettingsWindow.xaml",
+              "RelativeToolTip": "PaintAnalog\\Views\\PenSettingsWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-12-20T04:23:35.217Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\App.xaml",
+              "RelativeDocumentMoniker": "PaintAnalog\\App.xaml",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\App.xaml",
+              "RelativeToolTip": "PaintAnalog\\App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-12-16T03:46:30.874Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "XamlReader.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\AppData\\Local\\Temp\\.vsdbgsrc\\0a84cc53936b314ba955b54f50bf4796d8234943f3fd7b93873381b45d404026\\XamlReader.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\0a84cc53936b314ba955b54f50bf4796d8234943f3fd7b93873381b45d404026\\XamlReader.cs",
+              "ToolTip": "C:\\Users\\ASUS\\AppData\\Local\\Temp\\.vsdbgsrc\\0a84cc53936b314ba955b54f50bf4796d8234943f3fd7b93873381b45d404026\\XamlReader.cs[Tylko do odczytu]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\0a84cc53936b314ba955b54f50bf4796d8234943f3fd7b93873381b45d404026\\XamlReader.cs[Tylko do odczytu]",
+              "ViewState": "AQIAAJ4BAAAAAAAAAAAtwLUBAAACAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-26T21:58:56.537Z",
+              "EditorCaption": "[Tylko do odczytu]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "EraserSettingsWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\EraserSettingsWindow.xaml",
+              "RelativeDocumentMoniker": "PaintAnalog\\Views\\EraserSettingsWindow.xaml",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\EraserSettingsWindow.xaml",
+              "RelativeToolTip": "PaintAnalog\\Views\\EraserSettingsWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-12-23T23:05:57.987Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ToolsWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\ToolsWindow.xaml",
+              "RelativeDocumentMoniker": "PaintAnalog\\Views\\ToolsWindow.xaml",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\ToolsWindow.xaml",
+              "RelativeToolTip": "PaintAnalog\\Views\\ToolsWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-12-23T16:26:20.721Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "MainViewModel.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\ViewModels\\MainViewModel.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\ViewModels\\MainViewModel.cs",
@@ -208,12 +224,11 @@
               "RelativeToolTip": "PaintAnalog\\ViewModels\\MainViewModel.cs",
               "ViewState": "AQIAAMMAAAAAAAAAAABCwO4AAABVAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-11T04:48:06.381Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-11T04:48:06.381Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "RelayCommand.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\ViewModels\\RelayCommand.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\ViewModels\\RelayCommand.cs",
@@ -221,12 +236,11 @@
               "RelativeToolTip": "PaintAnalog\\ViewModels\\RelayCommand.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABcAAAABAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-11T04:47:37.262Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-11T04:47:37.262Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "ColorToVisibilityConverter.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Converters\\ColorToVisibilityConverter.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Converters\\ColorToVisibilityConverter.cs",
@@ -238,7 +252,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "SelectionBox.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\SelectionBox.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Views\\SelectionBox.cs",
@@ -250,7 +264,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "TextSizeConverter.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Converters\\TextSizeConverter.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Converters\\TextSizeConverter.cs",
@@ -262,7 +276,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "EraserSettingsWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\EraserSettingsWindow.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Views\\EraserSettingsWindow.xaml.cs",
@@ -274,7 +288,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "ToolsWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\ToolsWindow.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Views\\ToolsWindow.xaml.cs",
@@ -286,7 +300,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "ResizeCanvasDialog.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\Views\\ResizeCanvasDialog.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\Views\\ResizeCanvasDialog.xaml.cs",
@@ -298,7 +312,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "App.xaml.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\App.xaml.cs",
               "RelativeDocumentMoniker": "PaintAnalog\\App.xaml.cs",
@@ -310,7 +324,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "PaintAnalog.csproj",
               "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\PaintAnalog\\PaintAnalog\\PaintAnalog.csproj",
               "RelativeDocumentMoniker": "PaintAnalog\\PaintAnalog.csproj",
