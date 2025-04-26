@@ -55,7 +55,18 @@ Instructions on how to build and run the application locally will be added in fu
 
 ## Controls
 
-List of mouse/keyboard interactions for using the tools will be added in future
+### Hotkeys
+
+| Shortcut        | Action                                |
+|----------------|----------------------------------------|
+| **Ctrl + Z**   | Undo last action                      |
+| **Ctrl + Y**   | Redo last undone action               |
+| **Ctrl + S**   | Confirm current changes               |
+| **Ctrl + C**   | Copy last inserted image              |
+| **Ctrl + V**   | Paste last copied image               |
+| **Ctrl + B**   | Toggle bold formatting in text box    |
+| **Ctrl + I**   | Toggle italic formatting in text box  |
+| **Ctrl + U**   | Toggle underline in text box          |
 
 ---
 
