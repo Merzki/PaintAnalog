@@ -17,6 +17,7 @@
 - [Implementation Details](#implementation-details)
 - [Future Plans](#future-plans)
 - [Author](#author)
+- [License](#license)
 
 ---
 
@@ -97,5 +98,11 @@ List any planned features or improvements will be added in future
 ## Author
 
 Merzki
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE.md).
 
 ---
