@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PaintAnalog")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+035663f20bab7dd9411e4c7baf3bd57e343e6b05")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+41d28ae0e3117ac18fb18dfd65f508bb3bb2c9b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("PaintAnalog")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PaintAnalog")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
