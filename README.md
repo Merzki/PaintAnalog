@@ -73,7 +73,36 @@ Instructions on how to build and run the application locally will be added in fu
 
 ## Project Structure
 
-Short explanation of the folder and file organization inside the project will be added in future
+The solution `PaintAnalog` contains two projects:
+
+### 1. **PaintAnalog** – Main WPF Application  
+Organized according to MVVM principles with a clear separation of concerns.
+
+- **Converters/**  
+  Contains value converters used in data bindings:  
+  - `ColorToVisibilityConverter.cs` — Converts color values to visibility state  
+  - `TextSizeConverter.cs` — Converts font size values for UI display
+
+- **ViewModels/**  
+  ViewModel layer that handles logic and data binding:  
+  - `MainViewModel.cs` — Central logic for application state and UI interaction  
+  - `RelayCommand.cs` — Command implementation for MVVM bindings  
+  - `ViewModelBase.cs` — Base class for property change notifications
+
+- **Views/**  
+  XAML UI definitions for main windows and dialogs:  
+  - `MainWindow.xaml` — Main application window  
+  - `ToolsWindow.xaml` — Separate toolbox with extended tools  
+  - `EraserSettingsWindow.xaml`, `PenSettingsWindow.xaml`, `ResizeCanvasDialog.xaml` — Settings and utility dialogs  
+  - `SelectionBox.xaml` — Visual component for selection area
+
+- **App.xaml / AssemblyInfo.cs**  
+  Application entry point and assembly metadata
+
+### 2. **AnalogSetup** – Installer/Packaging Project  
+- Contains the deployment settings and assets for packaging the app  
+- Includes icon resource `a_letter_letters_alphabet_icon_208976.ico` for branding  
+- Uses output from `PaintAnalog` as the primary application payload
 
 ---
 
