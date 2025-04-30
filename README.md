@@ -1,7 +1,7 @@
 # PaintAnalog
 
-> A lightweight WPF-based drawing application inspired by classic MS Paint.  
-> Includes drawing tools, image & text insertion, selection editing, and savestate features.
+> A lightweight WPF-based drawing application inspired by classic MS Paint
+> Includes drawing tools, image & text insertion, selection editing, and savestate features
 
 ---
 
@@ -95,7 +95,7 @@ Instructions on how to build and run the application locally will be added in fu
 The solution `PaintAnalog` contains two projects:
 
 ### 1. **PaintAnalog** – Main WPF Application  
-Organized according to MVVM principles with a clear separation of concerns.
+Organized according to MVVM principles with a clear separation of concerns
 
 - **Converters/**  
   Contains value converters used in data bindings:  
@@ -127,7 +127,20 @@ Organized according to MVVM principles with a clear separation of concerns.
 
 ## Technologies Used
 
-List the frameworks, libraries, and design patterns used in the project will be added in future
+### Frameworks
+- **.NET 8.0 (Windows Desktop)** — the core framework used for building the application
+- **WPF (Windows Presentation Foundation)** — used for constructing the graphical user interface (GUI)
+
+### Libraries
+- **Extended.Wpf.Toolkit (v4.6.1)** — a third-party library that extends WPF's standard functionality with additional UI controls and utilities
+
+### Design Patterns
+- **MVVM (Model-View-ViewModel)** — the main architectural pattern used:
+  - Project structure includes `ViewModels`, `Views` folders, and a base class `ViewModelBase` implementing `INotifyPropertyChanged`
+  - Supports separation of concerns between UI and business logic
+- **Command Pattern** — implemented using the `RelayCommand` class to bind UI actions to ViewModel logic
+- **INotifyPropertyChanged** — used to notify the view about property changes in the ViewModel, which is standard in MVVM
+- **Value Converters** — custom converters in the `Converters` folder are used to transform data between the View and the ViewModel (e.g., for formatting or conditional display)
 
 ---
 
@@ -151,6 +164,6 @@ Merzki
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE.md).
+This project is licensed under the [MIT License](LICENSE.md)
 
 ---
