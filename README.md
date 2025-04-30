@@ -1,6 +1,6 @@
 # PaintAnalog
 
-> A lightweight WPF-based drawing application inspired by classic MS Paint
+> A lightweight WPF-based drawing application inspired by classic MS Paint  
 > Includes drawing tools, image & text insertion, selection editing, and savestate features
 
 ---
@@ -14,7 +14,6 @@
 - [Controls](#controls)
 - [Project Structure](#project-structure)
 - [Technologies Used](#technologies-used)
-- [Implementation Details](#implementation-details)
 - [Future Plans](#future-plans)
 - [Author](#author)
 - [License](#license)
@@ -48,7 +47,7 @@ Familiar concepts have been streamlined or reworked to feel more intuitive in a 
 
 ![Screenshot 1](./assets/analog1.png)
 
-### Color picker standart/advanced dialogue window
+### Color picker standard/advanced dialogue window
 
 <table cellpadding="8">
   <tr>
@@ -69,7 +68,68 @@ Familiar concepts have been streamlined or reworked to feel more intuitive in a 
 
 ## Installation and Launch
 
-Instructions on how to build and run the application locally will be added in future
+This section explains how to clone, restore, build, and run the **PaintAnalog** WPF application locally
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- **Windows 10 or 11**
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- **Visual Studio 2022** or newer with the **".NET Desktop Development"** workload
+
+---
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Merzki/PaintAnalog.git
+cd PaintAnalog
+```
+
+---
+
+### 2. Restore NuGet packages
+
+Run the following command to restore the required dependencies:
+
+```bash
+dotnet restore
+```
+
+This will install the following NuGet package:
+
+- `Extended.Wpf.Toolkit` version `4.6.1`
+
+---
+
+### 3. Build the project
+
+```bash
+dotnet build
+```
+
+Or use Visual Studio and press:
+
+```
+Ctrl + Shift + B
+```
+
+---
+
+### 4. Run the application
+
+Using the command line:
+
+```bash
+dotnet run --project PaintAnalog
+```
+
+Or, in Visual Studio:
+
+1. Open the solution file `PaintAnalog.sln`
+2. Make sure `PaintAnalog` is set as the startup project
+3. Press **F5** to launch the application
 
 ---
 
@@ -141,12 +201,6 @@ Organized according to MVVM principles with a clear separation of concerns
 - **Command Pattern** — implemented using the `RelayCommand` class to bind UI actions to ViewModel logic
 - **INotifyPropertyChanged** — used to notify the view about property changes in the ViewModel, which is standard in MVVM
 - **Value Converters** — custom converters in the `Converters` folder are used to transform data between the View and the ViewModel (e.g., for formatting or conditional display)
-
----
-
-## Implementation Details
-
-Notes on complex or interesting parts of the implementation will be added in future
 
 ---
 
