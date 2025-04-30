@@ -44,7 +44,26 @@ Familiar concepts have been streamlined or reworked to feel more intuitive in a 
 
 ## Screenshots
 
-Images will be added in future...
+### Overall view
+
+![Screenshot 1](./assets/analog1.png)
+
+### Color picker standart/advanced dialogue window
+
+<table cellpadding="8">
+  <tr>
+    <td><img src="./assets/analog2.png" width="100%"></td>
+    <td><img src="./assets/analog3.png" width="100%"></td>
+  </tr>
+</table>
+
+### Settings dialogue window example
+
+![Screenshot 4](./assets/analog4.png)
+
+### Tools menu dialogue window
+
+![Screenshot 5](./assets/analog5.png)
 
 ---
 
