@@ -206,7 +206,9 @@ Organized according to MVVM principles with a clear separation of concerns
 
 ## Future Plans
 
-List any planned features or improvements will be added in future
+At this stage, the **PaintAnalog** project has reached its completion, serving as the first meaningful milestone in my software development journey.  
+No further updates are expected in the near future, as I consider the application to be functionally complete and fully aligned with its intended purpose — a lightweight, intuitive drawing tool.  
+While I remain open to revisiting the project if compelling new ideas emerge, its current form reflects a finished product that fulfills all my original goals
 
 ---
 
