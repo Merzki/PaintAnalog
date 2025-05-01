@@ -68,9 +68,28 @@ Familiar concepts have been streamlined or reworked to feel more intuitive in a 
 
 ## Installation and Launch
 
-This section explains how to clone, restore, build, and run the **PaintAnalog** WPF application locally
+This section explains how to clone, build, and run the **PaintAnalog** WPF application locally, as well as how to install it via setup
 
-### Prerequisites
+---
+
+### 🔹 Option 1: Download Installer (Recommended)
+
+You can install **PaintAnalog** directly on your Windows machine by downloading the latest `.exe` installer from the [Releases page](https://github.com/Merzki/PaintAnalog/releases)
+
+1. Go to the [Releases](https://github.com/Merzki/PaintAnalog/releases) section on GitHub
+2. Download the `AnalogSetup.msi` and `setup.exe` files, than put it in same folder
+3. Run the `setup.exe` 
+4. After installation, launch **Analog** via shortcut
+
+#### Installer preview
+
+![Screenshot 6](./assets/analog6.png)
+
+---
+
+### 🔹 Option 2: Build from Source
+
+#### Prerequisites
 
 Make sure you have the following installed:
 
@@ -80,7 +99,7 @@ Make sure you have the following installed:
 
 ---
 
-### 1. Clone the repository
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Merzki/PaintAnalog.git
@@ -89,9 +108,7 @@ cd PaintAnalog
 
 ---
 
-### 2. Restore NuGet packages
-
-Run the following command to restore the required dependencies:
+#### 2. Restore NuGet packages
 
 ```bash
 dotnet restore
@@ -103,7 +120,7 @@ This will install the following NuGet package:
 
 ---
 
-### 3. Build the project
+#### 3. Build the project
 
 ```bash
 dotnet build
@@ -117,7 +134,7 @@ Ctrl + Shift + B
 
 ---
 
-### 4. Run the application
+#### 4. Run the application
 
 Using the command line:
 
@@ -128,7 +145,7 @@ dotnet run --project PaintAnalog
 Or, in Visual Studio:
 
 1. Open the solution file `PaintAnalog.sln`
-2. Make sure `PaintAnalog` is set as the startup project
+2. Set `PaintAnalog` as the startup project
 3. Press **F5** to launch the application
 
 ---
