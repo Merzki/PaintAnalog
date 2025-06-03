@@ -210,6 +210,9 @@ Organized according to MVVM principles with a clear separation of concerns
 
 ### Libraries
 - **Extended.Wpf.Toolkit (v4.6.1)** — a third-party library that extends WPF's standard functionality with additional UI controls and utilities
+  - Source: [GitHub Repository](https://github.com/xceedsoftware/wpftoolkit)
+  - License: [Microsoft Public License (Ms-PL)](https://github.com/xceedsoftware/wpftoolkit/blob/master/license.md)
+  - Used for enhanced UI controls and color picker functionality
 
 ### Design Patterns
 - **MVVM (Model-View-ViewModel)** — the main architectural pattern used:
